@@ -1,0 +1,163 @@
+  private setupStatsRoutes(): void {
+    // Get cluster stats
+    this.app.get('/api/stats', (req, res) => {
+      try {
+        const nodes = this.pubsub.getConnectedNodes();
+        const clientStats = this.pubsub.getClientStats();
+
+        // Aggregate stats from all nodes
+        const aggregatedStats = {
+          totalNodes: nodes.length,
+          totalConnections: 0,
+          totalBandwidth: 0,
+          totalSessions: 0,
+          byNode: nodes.map(node => ({
+            nodeId: node.nodeId,
+            stats: node.stats || {}
+          }))
+        };
+
+        // Sum up stats
+        nodes.forEach(node => {
+          if (node.stats) {
+            aggregatedStats.totalConnections += node.stats.connections?.active || 0;
+            aggregatedStats.totalBandwidth += node.stats.bandwidth?.total || 0;
+            aggregatedStats.totalSessions += node.stats.sessions?.active || 0;
+          }
+        });
+
+        res.json({
+          success: true,
+          data: {
+            cluster: aggregatedStats,
+            broker: clientStats,
+            timestamp: new Date().toISOString()
+          }
+        });
+
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get stats'
+        });
+      }
+    });
+
+    // Request fresh stats from nodes
+    this.app.post('/api/stats/refresh', (req, res) => {
+      try {
+        const message = createBaseMessage(
+          CHANNELS.STATS_REQUEST,
+          {
+            type: 'current',
+            timestamp: new Date().toISOString()
+          },
+          'admin'
+        );
+
+        this.pubsub.broadcastToNodes(message);
+
+        res.json({
+          success: true,
+          data: {
+            message: 'Stats refresh request sent to all nodes'
+          }
+        });
+
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: 'Failed to request stats refresh'
+        });
+      }
+    });
+  }
+
+  // Service Discovery Routes
+  private setupServiceDiscoveryRoutes(): void {
+    // Get service endpoints dynamically
+    this.app.get('/api/services', (req, res) => {
+      try {
+        const { serviceRegistry } = require('../../../shared/dist/ServiceRegistry.js');
+        const { envConfig } = require('../../../shared/dist/EnvConfig.js');
+        
+        res.json({
+          success: true,
+          data: {
+            // From service registry (dynamic)
+            registered: serviceRegistry.getEndpoints(),
+            
+            // From environment config (static)
+            configured: envConfig.getEndpoints(),
+            
+            // Registry status
+            registry: serviceRegistry.getStatus()
+          }
+        });
+      } catch (error) {
+        console.error('Service registry error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get service endpoints'
+        });
+      }
+    });
+
+    // WebSocket info for dashboard
+    this.app.get('/api/websocket-info', (req, res) => {
+      try {
+        const { envConfig } = require('../../../shared/dist/EnvConfig.js');
+        
+        res.json({
+          success: true,
+          data: {
+            websocketUrl: envConfig.getServiceUrl('pubsub'),
+            apiUrl: envConfig.getServiceUrl('api'),
+            dashboardUrl: envConfig.getServiceUrl('dashboard')
+          }
+        });
+      } catch (error) {
+        console.error('EnvConfig error:', error);
+        
+        // Fallback to environment variables
+        res.json({
+          success: true,
+          data: {
+            websocketUrl: `ws://${process.env.ADMIN_PUBSUB_HOST || 'localhost'}:${process.env.ADMIN_PUBSUB_PORT || '9000'}`,
+            apiUrl: `http://${process.env.ADMIN_API_HOST || 'localhost'}:${process.env.ADMIN_API_PORT || '8084'}`,
+            dashboardUrl: `http://${process.env.ADMIN_DASHBOARD_HOST || 'localhost'}:${process.env.ADMIN_DASHBOARD_PORT || '3001'}`
+          }
+        });
+      }
+    });
+  }
+
+  private errorHandler(error: any, req: express.Request, res: express.Response, next: express.NextFunction): void {
+    console.error('❌ API Error:', error);
+
+    res.status(error.status || 500).json({
+      success: false,
+      error: error.message || 'Internal server error',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  public async start(): Promise<void> {
+    // Connect to database first
+    try {
+      console.log('🔌 Connecting to database...');
+      await db.connect();
+      console.log('✅ Database connected successfully');
+    } catch (error) {
+      console.error('❌ Database connection failed:', error);
+      throw new Error('Database connection required for API server');
+    }
+
+    return new Promise((resolve) => {
+      this.app.listen(this.port, () => {
+        console.log(`🚀 Admin API server running on port ${this.port}`);
+        resolve();
+      });
+    });
+  }
+}

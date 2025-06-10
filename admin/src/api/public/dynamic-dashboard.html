@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Coturn Dashboard</title>
+    <!-- Same styles as before... -->
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Same HTML structure... -->
+    </div>
+
+    <script>
+        class DynamicCoturnDashboard {
+            constructor() {
+                this.ws = null;
+                this.connected = false;
+                this.nodes = new Map();
+                this.users = [];
+                this.stats = {};
+                this.charts = {};
+                this.services = {};
+                
+                // Will be dynamically discovered
+                this.apiUrl = window.appConfig.apiUrl;
+                this.wsUrl = window.appConfig.wsUrl;
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('🚀 Initializing Dynamic Dashboard...');
+                
+                // Discover services first
+                await this.discoverServices();
+                
+                this.setupEventListeners();
+                this.initializeCharts();
+                this.connectWebSocket();
+                
+                await this.loadInitialData();
+                this.startPeriodicUpdates();
+                
+                this.addLog('Dynamic dashboard initialized successfully', 'success');
+            }
+
+            async discoverServices() {
+                try {
+                    console.log('🔍 Discovering services...');
+                    
+                    // Try multiple potential service discovery endpoints
+                    const discoveryUrls = [
+                        `${window.location.origin}/api/services`,
+                        'http://localhost:8084/api/services',
+                        `${window.location.protocol}//${window.location.hostname}:8084/api/services`
+                    ];
+                    
+                    for (const url of discoveryUrls) {
+                        try {
+                            const response = await fetch(url);
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                this.services = result.data;
+                                
+                                // Set dynamic URLs
+                                this.apiUrl = this.services.configured.api.url;
+                                this.wsUrl = this.services.configured.pubsub.url;
+                                
+                                console.log('✅ Services discovered:', this.services);
+                                this.addLog(`Services discovered - API: ${this.apiUrl}, WebSocket: ${this.wsUrl}`, 'success');
+                                return;
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to discover from ${url}:`, error);
+                        }
+                    }
+                    
+                    // Fallback to environment-based discovery
+                    await this.fallbackDiscovery();
+                    
+                } catch (error) {
+                    console.error('❌ Service discovery failed:', error);
+                    await this.fallbackDiscovery();
+                }
+            }
+
+            async fallbackDiscovery() {
+                console.log('📡 Using fallback service discovery...');
+                
+                try {
+                    const response = await fetch('/api/websocket-info');
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.apiUrl = result.data.apiUrl;
+                        this.wsUrl = result.data.websocketUrl;
+                        
+                        this.addLog('Fallback discovery successful', 'info');
+                    } else {
+                        throw new Error('Fallback discovery failed');
+                    }
+                } catch (error) {
+                    console.error('❌ Fallback discovery failed, using defaults:', error);
+                    
+                    // Last resort - use defaults
+                    this.apiUrl = 'http://localhost:8084';
+                    this.wsUrl = 'ws://localhost:9000';
+                    
+                    this.addLog('Using default service URLs', 'warn');
+                }
+            }
+
+            // Rest of the dashboard methods remain the same...
+            // Just replace hardcoded URLs with this.apiUrl and this.wsUrl
+        }
+
+        // Initialize dynamic dashboard
+        const dashboard = new DynamicCoturnDashboard();
+        window.dashboard = dashboard;
+    </script>
+</body>
+</html>

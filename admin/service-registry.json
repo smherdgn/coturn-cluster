@@ -1,0 +1,15 @@
+[
+  {
+    "name": "coturn-pubsub",
+    "type": "pubsub",
+    "host": "localhost",
+    "port": 9000,
+    "status": "healthy",
+    "metadata": {
+      "version": "1.0.0",
+      "deploymentId": "fa6a3d95-edef-4a3b-8389-40ef15bb199b"
+    },
+    "registeredAt": "2025-06-10T16:17:29.633Z",
+    "lastHeartbeat": "2025-06-10T16:17:29.633Z"
+  }
+]

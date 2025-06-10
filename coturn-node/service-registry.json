@@ -1,0 +1,22 @@
+[
+  {
+    "name": "coturn-node-192.168.1.12-dyflqj8m",
+    "type": "node",
+    "host": "localhost",
+    "port": 8100,
+    "endpoints": {
+      "health": "/health",
+      "stats": "/stats",
+      "ready": "/ready"
+    },
+    "status": "healthy",
+    "metadata": {
+      "nodeId": "192.168.1.12-dyflqj8m",
+      "version": "1.0.0",
+      "coturnRunning": false,
+      "deploymentId": "fa6a3d95-edef-4a3b-8389-40ef15bb199b"
+    },
+    "registeredAt": "2025-06-10T16:17:29.828Z",
+    "lastHeartbeat": "2025-06-10T16:20:19.851Z"
+  }
+]

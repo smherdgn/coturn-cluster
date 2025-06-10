@@ -1,36 +1,47 @@
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import cors from 'cors';
-import helmet from 'helmet';
+// admin/src/server.ts
+import { PubSubBroker } from './pubsub/broker';
+import { AdminAPIServer } from './api/server';
+import { envConfig } from '../../shared/lib/EnvConfig';
 
-const app = express();
-const PORT = process.env.API_PORT || 8080;
-const PUBSUB_PORT = process.env.PUBSUB_PORT || 9001;
-const DASHBOARD_PORT = process.env.DASHBOARD_PORT || 3000;
+async function startAdminCluster() {
+    try {
+        console.log('🚀 Starting Coturn Admin Cluster...');
+        console.log('🔧 === CLUSTER CONFIGURATION ===');
+        console.log(`Deployment ID: ${envConfig.getConfig().DEPLOYMENT_ID}`);
+        console.log(`Environment: ${envConfig.getConfig().NODE_ENV}`);
+        console.log('');
+        console.log(`📊 Admin API Server: http://localhost:${envConfig.getConfig().ADMIN_API_PORT}`);
+        console.log(`🎛️  Dashboard: http://localhost:${envConfig.getConfig().ADMIN_API_PORT}`);
+        console.log(`📡 Pub/Sub: ws://localhost:${envConfig.getConfig().ADMIN_PUBSUB_PORT}`);
+        console.log(`🤖 Agent: http://localhost:${envConfig.getConfig().COTURN_AGENT_PORT}`);
+        console.log('=============================');
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+        // Start pub/sub broker (database independent)
+        console.log('📡 Starting pub/sub broker...');
+        const pubsubBroker = new PubSubBroker(envConfig.getConfig().ADMIN_PUBSUB_PORT);
 
-// Routes placeholder
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+        // Start API server
+        console.log('📊 Starting API server...');
+        const apiServer = new AdminAPIServer(envConfig.getConfig().ADMIN_API_PORT, pubsubBroker);
+        await apiServer.start();
+
+        console.log('✅ Admin cluster started successfully!');
+
+    } catch (error) {
+        console.error('❌ Failed to start admin cluster:', error);
+        process.exit(1);
+    }
+}
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+    console.log('🔄 Shutting down admin cluster...');
+    process.exit(0);
 });
 
-// WebSocket Pub/Sub Server
-const wss = new WebSocketServer({ port: PUBSUB_PORT });
-
-wss.on('connection', (ws) => {
-  console.log('New WebSocket connection');
-  
-  ws.on('message', (data) => {
-    console.log('Received:', data.toString());
-  });
+process.on('SIGTERM', () => {
+    console.log('🔄 Shutting down admin cluster...');
+    process.exit(0);
 });
 
-// Start servers
-app.listen(PORT, () => {
-  console.log(`🚀 Admin API server running on port ${PORT}`);
-  console.log(`📡 Pub/Sub server running on port ${PUBSUB_PORT}`);
-});
+startAdminCluster();

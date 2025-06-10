@@ -1,36 +1,28 @@
-FROM ubuntu:22.04
+FROM node:18-alpine
 
-# Install coturn and Node.js
-RUN apt-get update && apt-get install -y \
-    coturn \
-    curl \
-    supervisor \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# Install coturn
+RUN apk add --no-cache coturn
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY ../shared/package*.json ../shared/
+# Copy shared library first
+COPY shared/ ./shared/
+
+# Copy coturn-node package files
+COPY coturn-node/package*.json ./
+COPY coturn-node/tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
-# Copy source code
-COPY . .
-COPY ../shared ../shared
+# Copy coturn-node source
+COPY coturn-node/src/ ./src/
+COPY coturn-node/config/ ./config/
+COPY coturn-node/coturn-config/ ./coturn-config/
 
-# Build agent
+# Build
 RUN npm run build
 
-# Copy coturn config
-COPY config/turnserver.conf /etc/turnserver.conf
-COPY scripts/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+EXPOSE 8100 3478 5349
 
-# Expose ports
-EXPOSE 3478/udp 5349/tcp 8080
-
-# Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["npm", "start"]

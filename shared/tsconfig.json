@@ -2,17 +2,17 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
-    "outDir": "lib",
-    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
+
+    /* Bu paket bir kütüphane olduğu için kritik ayarlar */
+    "declaration": true, // <-- Kullanım kılavuzunu (.d.ts) oluşturur.
+    "outDir": "lib",     // <-- Derlenmiş dosyaları 'lib' klasörüne koyar.
+    "rootDir": "src",
+    "paths": {
+      "@shared/*": ["../shared/dist/*"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src"], // Sadece 'src' içindekileri derle
   "exclude": ["node_modules", "lib"]
 }

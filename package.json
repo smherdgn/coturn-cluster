@@ -3,13 +3,10 @@
   "version": "1.0.0",
   "description": "Scalable Coturn TURN/STUN server cluster with WebSocket pub/sub management",
   "private": true,
-  "workspaces": [
-    "admin",
-    "coturn-node",
-    "shared"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:admin\" \"npm run dev:node\"",
+    "install:all": "npm install && cd admin && npm install && cd ../coturn-node && npm install && cd ../shared && npm install",
+    "dev:old": "concurrently \"npm run dev:admin\" \"npm run dev:node\"",
+    "dev": "./scripts/start-dev.sh",
     "dev:admin": "cd admin && npm run dev",
     "dev:node": "cd coturn-node && npm run dev",
     "build": "npm run build:shared && npm run build:admin && npm run build:node",
@@ -21,15 +18,32 @@
     "docker:down": "docker-compose down",
     "k8s:deploy": "kubectl apply -f k8s/",
     "k8s:delete": "kubectl delete -f k8s/",
-    "lint": "npm run lint --workspaces",
-    "test": "npm run test --workspaces"
+    "lint": "cd admin && npm run lint && cd ../coturn-node && npm run lint",
+    "test": "cd admin && npm test && cd ../coturn-node && npm test && cd ../shared && npm test",
+    "start:system": "./start-system.sh",
+    "health": "./health-check.sh",
+    "monitor": "./performance-monitor.sh",
+    "sync:env": "./sync-all-env.sh"
+  },
+  "dependencies": {
+    "@coturn/shared": "file:../shared"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "concurrently": "^8.2.2",
+    "eslint": "^8.45.0",
     "prettier": "^3.0.0",
-    "eslint": "^8.45.0"
+    "typescript": "^5.8.3"
   },
-  "keywords": ["coturn", "webrtc", "turn", "stun", "kubernetes", "websocket"],
+  "keywords": [
+    "coturn",
+    "webrtc",
+    "turn",
+    "stun",
+    "kubernetes",
+    "websocket"
+  ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

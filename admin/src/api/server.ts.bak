@@ -1,0 +1,126 @@
+// admin/src/api/server.ts
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import { PubSubBroker } from '../pubsub/broker';
+
+export class AdminAPIServer {
+    private app: express.Application;
+    private pubsubBroker: PubSubBroker;
+    private port: number;
+
+    constructor(port = 8080, pubsubBroker: PubSubBroker) {
+        this.port = port;
+        this.pubsubBroker = pubsubBroker;
+        this.app = express();
+        this.setupMiddleware();
+        this.setupRoutes();
+    }
+
+    private setupMiddleware() {
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(express.static(path.join(__dirname, '../public')));
+    }
+
+    private setupRoutes() {
+        // Health check
+        this.app.get('/health', (req, res) => {
+            res.json({
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                pubsub: this.pubsubBroker.getClientStats()
+            });
+        });
+
+        // Service registry endpoints
+        this.app.get('/api/services', (req, res) => {
+            const nodes = this.pubsubBroker.getConnectedNodes();
+            const services = nodes.map(node => ({
+                serviceId: `coturn-node-${node.nodeId}`,
+                host: node.ip,
+                port: node.ports.turn,
+                status: node.status,
+                metadata: {
+                    nodeId: node.nodeId,
+                    capabilities: node.capabilities,
+                    version: node.version,
+                    agentVersion: node.agentVersion,
+                    lastHeartbeat: node.lastHeartbeat
+                }
+            }));
+
+            res.json(services);
+        });
+
+        // Get specific service
+        this.app.get('/api/services/:serviceId', (req, res) => {
+            const { serviceId } = req.params;
+            const nodeId = serviceId.replace('coturn-node-', '');
+            const nodes = this.pubsubBroker.getConnectedNodes();
+            const node = nodes.find(n => n.nodeId === nodeId);
+
+            if (node) {
+                res.json({
+                    serviceId,
+                    host: node.ip,
+                    port: node.ports.turn,
+                    status: node.status,
+                    metadata: {
+                        nodeId: node.nodeId,
+                        capabilities: node.capabilities,
+                        version: node.version,
+                        agentVersion: node.agentVersion,
+                        lastHeartbeat: node.lastHeartbeat
+                    }
+                });
+            } else {
+                res.status(404).json({ error: 'Service not found' });
+            }
+        });
+
+        // Node management
+        this.app.get('/api/nodes', (req, res) => {
+            const nodes = this.pubsubBroker.getConnectedNodes();
+            res.json(nodes);
+        });
+
+        // System stats
+        this.app.get('/api/stats', (req, res) => {
+            res.json(this.pubsubBroker.getClientStats());
+        });
+
+        // Debug info
+        this.app.get('/api/debug', (req, res) => {
+            res.json(this.pubsubBroker.debugInfo());
+        });
+
+        // Dashboard
+        this.app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, '../public/index.html'));
+        });
+
+        // Service registry dashboard
+        this.app.get('/registry.html', (req, res) => {
+            res.sendFile(path.join(__dirname, '../public/dynamic-dashboard.html'));
+        });
+    }
+
+    async start() {
+        return new Promise<void>((resolve, reject) => {
+            this.app.listen(this.port, () => {
+                console.log(`📊 Admin API Server: http://localhost:${this.port}`);
+                console.log(`🎛️  Dashboard: http://localhost:${this.port}`);
+                resolve();
+            }).on('error', reject);
+        });
+    }
+}
+
+
+ 
+
+import { setupExtendedRoutes } from './extensions';
+
+// Add this after existing routes in setupRoutes method
+setupExtendedRoutes(this.app);

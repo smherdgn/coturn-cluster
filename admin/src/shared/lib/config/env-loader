@@ -1,0 +1,52 @@
+import fs from 'fs';
+import path from 'path';
+
+export function loadRootEnvironment(options: { required?: string[] } = {}): void {
+  try {
+    // Find root .env file
+    let currentDir = __dirname;
+    let rootEnvPath: string | null = null;
+
+    for (let i = 0; i < 5; i++) {
+      const testPath = path.join(currentDir, '.env');
+      if (fs.existsSync(testPath)) {
+        rootEnvPath = testPath;
+        break;
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    if (!rootEnvPath) {
+      console.warn('⚠️  Root .env file not found');
+      return;
+    }
+
+    // Load and parse .env
+    const content = fs.readFileSync(rootEnvPath, 'utf8');
+    const lines = content.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trim().replace(/^export\s+/, '');
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      
+      const [key, ...valueParts] = trimmed.split('=');
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    }
+
+    // Validate required
+    const missing = (options.required || []).filter(v => !process.env[v]);
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+
+    console.log('✅ Environment loaded successfully');
+  } catch (error) {
+    console.error('❌ Failed to load environment:', error);
+    throw error;
+  }
+}

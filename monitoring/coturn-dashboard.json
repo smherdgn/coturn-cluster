@@ -1,0 +1,48 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Coturn Cluster Dashboard",
+    "tags": ["coturn", "cluster"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Nodes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "coturn_nodes_total",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Total Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(coturn_connections_active)",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Bandwidth Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(coturn_bandwidth_bytes_total[5m])",
+            "refId": "C"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s"
+  }
+}

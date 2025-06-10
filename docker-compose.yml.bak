@@ -1,0 +1,166 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${PROJECT_NAME:-coturn-cluster}_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-coturn_cluster}
+      POSTGRES_USER: ${POSTGRES_USER:-coturn_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+      - ./admin/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - coturn-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-coturn_admin} -d ${POSTGRES_DB:-coturn_cluster}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${PROJECT_NAME:-coturn-cluster}_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - coturn-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  admin:
+    build: 
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME:-coturn-cluster}_admin
+    ports:
+      - "${ADMIN_DASHBOARD_PORT:-3000}:3000"
+      - "${ADMIN_API_PORT:-8081}:8081"
+      - "${ADMIN_PUBSUB_PORT:-9001}:9001"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - ADMIN_PUBSUB_PORT=${ADMIN_PUBSUB_PORT:-9001}
+      - ADMIN_API_PORT=${ADMIN_API_PORT:-8081}
+      - ADMIN_DASHBOARD_PORT=${ADMIN_DASHBOARD_PORT:-3000}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB:-coturn_cluster}
+      - POSTGRES_USER=${POSTGRES_USER:-coturn_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_SSL=${POSTGRES_SSL:-false}
+      - POSTGRES_POOL_MIN=${POSTGRES_POOL_MIN:-2}
+      - POSTGRES_POOL_MAX=${POSTGRES_POOL_MAX:-10}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./shared:/app/shared:ro
+    networks:
+      - coturn-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  coturn-node:
+    build:
+      context: ./coturn-node
+      dockerfile: Dockerfile
+    ports:
+      - "${COTURN_PORT:-3478}:${COTURN_PORT:-3478}/udp"
+      - "${COTURN_TLS_PORT:-5349}:${COTURN_TLS_PORT:-5349}/tcp"
+      - "${COTURN_AGENT_PORT:-8082}:${COTURN_AGENT_PORT:-8082}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - ADMIN_PUBSUB_URL=ws://admin:${ADMIN_PUBSUB_PORT:-9001}
+      - NODE_ID=coturn-node-1
+      - COTURN_AGENT_PORT=${COTURN_AGENT_PORT:-8082}
+      - COTURN_PORT=${COTURN_PORT:-3478}
+      - COTURN_TLS_PORT=${COTURN_TLS_PORT:-5349}
+      - COTURN_MIN_PORT=${COTURN_MIN_PORT:-49152}
+      - COTURN_MAX_PORT=${COTURN_MAX_PORT:-65535}
+      - COTURN_REALM=${COTURN_REALM:-example.com}
+      - COTURN_SECRET=${COTURN_SECRET}
+    volumes:
+      - ./shared:/app/shared:ro
+      - coturn_config:/etc/turnserver
+      - coturn_logs:/var/log/coturn
+    networks:
+      - coturn-net
+    depends_on:
+      - admin
+      - postgres
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME:-coturn-cluster}_nginx
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/ssl/nginx
+    networks:
+      - coturn-net
+    depends_on:
+      - admin
+      - coturn-node
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ${PROJECT_NAME:-coturn-cluster}_prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - coturn-net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ${PROJECT_NAME:-coturn-cluster}_grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./monitoring/coturn-dashboard.json:/etc/grafana/provisioning/dashboards/coturn.json
+      - grafana_data:/var/lib/grafana
+    networks:
+      - coturn-net
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  coturn_config:
+  coturn_logs:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  coturn-net:
+    driver: bridge
