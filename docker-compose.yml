@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  admin:
+    build: 
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Dashboard
+      - "8080:8080"  # API
+      - "9001:9001"  # WebSocket Pub/Sub
+    environment:
+      - NODE_ENV=development
+      - PUBSUB_PORT=9001
+      - API_PORT=8080
+      - DASHBOARD_PORT=3000
+    volumes:
+      - ./shared:/app/shared:ro
+    networks:
+      - coturn-net
+
+  coturn-node:
+    build:
+      context: ./coturn-node
+      dockerfile: Dockerfile
+    ports:
+      - "3478:3478/udp"  # TURN
+      - "5349:5349/tcp"  # TURNS
+      - "8081:8080"      # Agent API
+    environment:
+      - NODE_ENV=development
+      - ADMIN_PUBSUB_URL=ws://admin:9001
+      - NODE_ID=coturn-node-1
+      - TURN_PORT=3478
+      - TURNS_PORT=5349
+      - AGENT_PORT=8080
+    volumes:
+      - ./shared:/app/shared:ro
+      - coturn-config:/etc/turnserver
+      - coturn-logs:/var/log/coturn
+    networks:
+      - coturn-net
+    depends_on:
+      - admin
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/ssl/nginx
+    networks:
+      - coturn-net
+    depends_on:
+      - admin
+      - coturn-node
+
+volumes:
+  coturn-config:
+  coturn-logs:
+
+networks:
+  coturn-net:
+    driver: bridge

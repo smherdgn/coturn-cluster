@@ -1,0 +1,35 @@
+{
+  "name": "coturn-cluster",
+  "version": "1.0.0",
+  "description": "Scalable Coturn TURN/STUN server cluster with WebSocket pub/sub management",
+  "private": true,
+  "workspaces": [
+    "admin",
+    "coturn-node",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:admin\" \"npm run dev:node\"",
+    "dev:admin": "cd admin && npm run dev",
+    "dev:node": "cd coturn-node && npm run dev",
+    "build": "npm run build:shared && npm run build:admin && npm run build:node",
+    "build:shared": "cd shared && npm run build",
+    "build:admin": "cd admin && npm run build",
+    "build:node": "cd coturn-node && npm run build",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "k8s:deploy": "kubectl apply -f k8s/",
+    "k8s:delete": "kubectl delete -f k8s/",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.0.0",
+    "eslint": "^8.45.0"
+  },
+  "keywords": ["coturn", "webrtc", "turn", "stun", "kubernetes", "websocket"],
+  "author": "Your Name",
+  "license": "MIT"
+}
