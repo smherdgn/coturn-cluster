@@ -1,0 +1,112 @@
+--- a/admin/src/api/server.ts
++++ b/admin/src/api/server.ts
+@@ -4,6 +4,7 @@
+ import cors from 'cors';
+ import { PubSubBroker } from '../pubsub/broker';
+ import { spawn, exec } from 'child_process';
++import { DockerManager } from './docker-manager';
+ import { promisify } from 'util';
+ 
+ const execAsync = promisify(exec);
+@@ -12,10 +13,12 @@
+     private app: express.Application;
+     private pubsubBroker: PubSubBroker;
+     private port: number;
++    private dockerManager: DockerManager;
+ 
+     constructor(port = 8080, pubsubBroker: PubSubBroker) {
+         this.port = port;
+         this.pubsubBroker = pubsubBroker;
++        this.dockerManager = new DockerManager();
+         this.app = express();
+         this.setupMiddleware();
+         this.setupRoutes();
+@@ -94,39 +97,7 @@
+ 
+                 console.log(`🚀 Kubernetes'e yeni Coturn node ekleniyor: ${nodeId}`);
+ 
+-                const yamlManifest = `
+-apiVersion: apps/v1
+-kind: Deployment
+-metadata:
+-  name: coturn-${nodeId}
+-  labels:
+-    app: coturn-node
+-    node-id: ${nodeId}
+-spec:
+-  replicas: 1
+-  selector:
+-    matchLabels:
+-      app: coturn-node
+-      node-id: ${nodeId}
+-  template:
+-    metadata:
+-      labels:
+-        app: coturn-node
+-        node-id: ${nodeId}
+-    spec:
+-      containers:
+-        - name: coturn
+-          image: coturn-cluster_coturn-node
+-          tty: true
+-          stdin: true
+-          env:
+-            - name: NODE_ID
+-              value: "${nodeId}"
+-            - name: COTURN_AGENT_PORT
+-              value: "${finalPorts.agent}"
+-            - name: COTURN_PORT
+-              value: "${finalPorts.turn}"
+-            - name: COTURN_TLS_PORT
+-              value: "${finalPorts.tls}"
+-            - name: ADMIN_PUBSUB_URL
+-              value: "ws://admin:9000"
+-          ports:
+-            - containerPort: ${finalPorts.turn}
+-`;
+-
+-                await this.applyYamlManifest(yamlManifest);
++                await this.dockerManager.createCoturnNode(nodeId, finalIP, finalPorts);
+ 
+                 if (autoRegisterNginx) {
+                     console.log(`🔧 Nginx güncellenecek: ${finalIP}:${finalPorts.turn}`);
+@@ -137,11 +108,11 @@
+                     nodeId,
+                     ip: finalIP,
+                     ports: finalPorts,
+-                    message: 'Kubernetes node oluşturuldu'
++                    message: 'Docker node created successfully'
+                 });
+ 
+             } catch (error) {
+-                console.error('❌ Kubernetes node oluşturma hatası:', error);
+-                res.status(500).json({ success: false, error: 'Kubernetes node eklenemedi' });
++                console.error('❌ Docker node creation error:', error);
++                res.status(500).json({ success: false, error: 'Failed to create Docker node' });
+             }
+         });
+ 
+@@ -149,8 +120,8 @@
+             try {
+                 const { nodeId } = req.params;
+-                console.log(`🗑️ Kubernetes deployment siliniyor: ${nodeId}`);
+-                await execAsync(`kubectl delete deployment coturn-${nodeId}`);
+-                res.json({ success: true, message: 'Node silindi' });
++                console.log(`🗑️ Docker container removing: ${nodeId}`);
++                await this.dockerManager.removeCoturnNode(nodeId);
++                res.json({ success: true, message: 'Docker node removed' });
+             } catch (error) {
+                 res.status(500).json({ error: 'Node silme başarısız' });
+             }
+@@ -160,8 +131,8 @@
+             try {
+                 const { nodeId } = req.params;
+-                console.log(`🔄 Kubernetes deployment yeniden başlatılıyor: ${nodeId}`);
+-                await execAsync(`kubectl delete deployment coturn-${nodeId}`);
+-                res.json({ success: true, message: 'Node yeniden başlatıldı' });
++                console.log(`🔄 Docker container restarting: ${nodeId}`);
++                await this.dockerManager.restartCoturnNode(nodeId);
++                res.json({ success: true, message: 'Docker node restarted' });
+             } catch (error) {
+                 res.status(500).json({ error: 'Yeniden başlatma başarısız' });
+             }

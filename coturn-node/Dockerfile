@@ -1,27 +1,50 @@
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY shared/package*.json ./shared/
+COPY coturn-node/package*.json ./coturn-node/
+COPY coturn-node/tsconfig.json ./coturn-node/
+
+# Install dependencies
+RUN cd shared && npm ci
+RUN cd coturn-node && npm ci
+
+# Copy and build shared
+COPY shared/ ./shared/
+WORKDIR /app/shared
+RUN npm run build
+
+# Copy and build coturn-node
+WORKDIR /app
+COPY coturn-node/src/ ./coturn-node/src/
+COPY coturn-node/config/ ./coturn-node/config/
+COPY coturn-node/coturn-config/ ./coturn-node/coturn-config/
+
+WORKDIR /app/coturn-node
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine AS production
 
 # Install coturn
 RUN apk add --no-cache coturn
 
 WORKDIR /app
 
-# Copy shared library first
-COPY shared/ ./shared/
+# Copy built files
+COPY --from=builder /app/coturn-node/dist ./dist
+COPY --from=builder /app/coturn-node/config ./config
+COPY --from=builder /app/coturn-node/coturn-config ./coturn-config
+COPY --from=builder /app/coturn-node/package*.json ./
 
-# Copy coturn-node package files
-COPY coturn-node/package*.json ./
-COPY coturn-node/tsconfig.json ./
+# Copy shared library to the expected location for runtime
+COPY --from=builder /app/shared/dist ./shared/lib
 
-# Install dependencies
-RUN npm ci
-
-# Copy coturn-node source
-COPY coturn-node/src/ ./src/
-COPY coturn-node/config/ ./config/
-COPY coturn-node/coturn-config/ ./coturn-config/
-
-# Build
-RUN npm run build
+# Install production dependencies
+RUN npm ci --only=production
 
 EXPOSE 8100 3478 5349
 

@@ -8,7 +8,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf lib",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+
   },
   "dependencies": {
     "dotenv": "^16.5.0",

@@ -1,16 +1,19 @@
-// Path: ./admin/tsconfig.json  (ve ./coturn-node/tsconfig.json)
 {
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true, // JSON dosyalarını import etmeye yarar
-
-    /* Bu paket bir uygulama olduğu için ayarlar */
-    "outDir": "dist", // <-- Derlenmiş dosyaları 'dist' klasörüne koyar.
-    "rootDir": "src"
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "../shared/lib": ["../shared/dist"],
+      "../shared/lib/*": ["../shared/dist/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

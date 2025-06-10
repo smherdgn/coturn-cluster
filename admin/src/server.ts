@@ -1,7 +1,7 @@
 // admin/src/server.ts
 import { PubSubBroker } from './pubsub/broker';
 import { AdminAPIServer } from './api/server';
-import { envConfig } from '../../shared/lib/EnvConfig';
+import { envConfig } from '../../shared/dist/EnvConfig.js';
 
 async function startAdminCluster() {
     try {
