@@ -1,7 +1,6 @@
 // admin/src/pubsub/broker.ts
 import { WebSocket, WebSocketServer } from 'ws';
-import { generateId, createBaseMessage, parseMessage, stringifyMessage } from '../../../shared/lib/index.js';
-import { validateMessage } from '../../../shared/lib/index.js';
+import { generateId, createBaseMessage, parseMessage, stringifyMessage, validateMessage } from "@coturn-cluster/shared";
 
 interface Client {
     id: string;

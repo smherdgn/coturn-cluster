@@ -40,8 +40,9 @@ COPY --from=builder /app/coturn-node/config ./config
 COPY --from=builder /app/coturn-node/coturn-config ./coturn-config
 COPY --from=builder /app/coturn-node/package*.json ./
 
-# Copy shared library to the expected location for runtime
-COPY --from=builder /app/shared/dist ./shared/lib
+# Copy shared library to node_modules for package resolution
+COPY --from=builder /app/shared/dist ./node_modules/@coturn-cluster/shared/
+COPY --from=builder /app/shared/package.json ./node_modules/@coturn-cluster/shared/
 
 # Install production dependencies
 RUN npm ci --only=production

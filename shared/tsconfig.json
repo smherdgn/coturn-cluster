@@ -4,15 +4,10 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-
-    /* Bu paket bir kütüphane olduğu için kritik ayarlar */
-    "declaration": true, // <-- Kullanım kılavuzunu (.d.ts) oluşturur.
-    "outDir": "lib",     // <-- Derlenmiş dosyaları 'lib' klasörüne koyar.
-    "rootDir": "src",
-    "paths": {
-      "@shared/*": ["../shared/dist/*"]
-    }
+    "declaration": true,
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src"], // Sadece 'src' içindekileri derle
+  "include": ["src"],
   "exclude": ["node_modules", "lib"]
 }

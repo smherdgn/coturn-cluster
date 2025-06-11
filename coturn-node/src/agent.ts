@@ -2,9 +2,9 @@
 import express from 'express';
 import WebSocket from 'ws';
 import { CoturnManager } from './coturn/manager/CoturnManager';
-import { envConfig } from '../../shared/lib/EnvConfig';
-import { generateId, createBaseMessage } from '../../shared/lib/utils';
-import { ServiceRegistry } from '../../shared/lib/ServiceRegistry';
+import { envConfig } from "@coturn-cluster/shared";
+import { generateId, createBaseMessage } from "@coturn-cluster/shared";
+import { ServiceRegistry } from "@coturn-cluster/shared";
 
 export class CoturnAgent {
     private app: express.Application;

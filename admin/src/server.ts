@@ -1,7 +1,7 @@
 // admin/src/server.ts
 import { PubSubBroker } from './pubsub/broker';
 import { AdminAPIServer } from './api/server';
-import { envConfig } from '../../shared/dist/EnvConfig.js';
+import { envConfig } from "@coturn-cluster/shared";
 
 async function startAdminCluster() {
     try {

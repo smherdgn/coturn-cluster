@@ -10,10 +10,15 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "../shared/lib": ["../shared/dist"],
-      "../shared/lib/*": ["../shared/dist/*"]
+      "@coturn-cluster/shared": ["../shared/lib/index"]  
+
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
