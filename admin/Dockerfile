@@ -1,50 +1,46 @@
-# Build stage
+# Basit ve Güvenilir Çözüm - Admin Dockerfile
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy shared library first
-COPY shared/ ./shared/
+# Tüm dosyaları kopyala
+COPY . .
 
-# Copy admin package files
-COPY admin/package*.json ./admin/
-COPY admin/tsconfig.json ./admin/
-
-# Build shared first
+# Shared'ı önce build et
 WORKDIR /app/shared
 RUN npm ci && npm run build
 
-# Install admin dependencies
+# Admin'i build et
 WORKDIR /app/admin
-RUN npm ci
-
-# Copy admin source
-COPY admin/src/ ./src/
-COPY admin/public/ ./public/
-
-# Build admin - ensuring the output goes to correct location
-RUN npm run build
-
-# Debug: List contents to see what was built
-RUN ls -la dist/
+RUN npm ci && npm run build
 
 # Production stage
 FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Copy built files from admin directory
+# Build edilmiş dosyaları kopyala
 COPY --from=builder /app/admin/dist ./dist
 COPY --from=builder /app/admin/public ./public
 COPY --from=builder /app/admin/package*.json ./
 
-# Copy shared library to node_modules for package resolution
-COPY --from=builder /app/shared/dist ./node_modules/@coturn-cluster/shared/
-COPY --from=builder /app/shared/package.json ./node_modules/@coturn-cluster/shared/
+# Shared library dosyalarını kopyala
+COPY --from=builder /app/shared/lib ./shared-lib/
 
-# Install production dependencies
-RUN npm ci --only=production
+# Node modules'ü kopyala (shared bağımlılığı dahil)
+COPY --from=builder /app/admin/node_modules ./node_modules
 
-EXPOSE 3000 8081 9001
+# Shared library'yi symlink ile bağla
+RUN mkdir -p ./node_modules/@coturn-cluster && \
+    ln -sf /app/shared-lib ./node_modules/@coturn-cluster/shared
 
-CMD ["npm", "start"]
+# Non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S coturn -u 1001 && \
+    chown -R coturn:nodejs /app
+
+USER coturn
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
