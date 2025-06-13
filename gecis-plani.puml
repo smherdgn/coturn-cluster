@@ -1,0 +1,183 @@
+@startuml
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam activityStyle rectangle
+skinparam defaultFontSize 10
+
+title Docker Compose to Kubernetes Migration Plan
+
+start
+
+partition "1. HAZIRLIK AŞAMASI" {
+  :Kubernetes cluster hazırlığı;
+  :Container registry setup;
+  :Namespace oluşturma (coturn-system);
+  :Monitoring namespace oluşturma;
+  :NGINX Ingress Controller kurulumu;
+  :Persistent Volume provisioner kurulumu;
+}
+
+partition "2. SHARED LIBRARY MİGRASYONU" {
+  :packages/shared TypeScript library'sini
+  K8s ConfigMap'e çevirme;
+  :Shared library'yi NPM private 
+  registry'ye publish etme;
+  :Environment variables'ları 
+  K8s Secrets'e çevirme;
+  :Service discovery logic'ini 
+  K8s Service DNS'e adapte etme;
+}
+
+partition "3. VERİTABANI MİGRASYONU" {
+  :PostgreSQL StatefulSet 
+  deployment'ı hazırlama;
+  :PersistentVolume ve 
+  PersistentVolumeClaim oluşturma;
+  :Mevcut PostgreSQL verilerini 
+  export etme;
+  :K8s PostgreSQL'e veri import etme;
+  :Database init scripts'leri 
+  ConfigMap olarak ekleme;
+  :nexrtc_db ve admin_db 
+  schema'larını oluşturma;
+}
+
+partition "4. REDIS MİGRASYONU" {
+  :Redis StatefulSet 
+  deployment'ı hazırlama;
+  :Redis persistence için PVC oluşturma;
+  :Redis Pub/Sub channel'larını test etme;
+  :Redis exporter ekleme;
+}
+
+partition "5. COTURN NODE DÖNÜŞÜMÜ" {
+  :apps/coturn-node Dockerfile'ını 
+  multi-stage build'e çevirme;
+  :COTURN config dosyalarını 
+  ConfigMap'e çevirme;
+  :Agent.ts environment variables'larını 
+  K8s ortamına adapte etme;
+  :COTURN Deployment manifest'leri hazırlama;
+  :Service discovery için K8s 
+  Service annotations ekleme;
+  :HPA konfigürasyonu;
+  :/metrics endpoint'ini Prometheus 
+  annotation'larıyla işaretleme;
+}
+
+partition "6. ADMIN SERVİSİ DÖNÜŞÜMÜ" {
+  :apps/admin Dockerfile'ını optimize etme;
+  :Express.js static files'ları 
+  K8s ConfigMap'e çevirme;
+  :Admin Deployment manifest'i 
+  hazırlama (replica: 1);
+  :ClusterIP Service oluşturma 
+  (external access yok);
+  :PostgreSQL bağlantı string'ini 
+  Secret'ten okuma;
+  :Redis connection config'ini 
+  Secret'ten okuma;
+  :Health check endpoint'leri ekleme;
+}
+
+partition "7. NEXRTC SERVİSİ DÖNÜŞÜMÜ" {
+  :nextrtc-video-call Next.js 
+  app'ini containerize etme;
+  :Static assets'leri optimize etme;
+  :Environment variables'ları K8s 
+  Secrets/ConfigMaps'e çevirme;
+  :PostgreSQL connection 
+  (nexrtc_db) konfigürasyonu;
+  :COTURN endpoint'lerini K8s 
+  Service DNS'e çevirme;
+  :Deployment manifest'i hazırlama 
+  (multi-replica);
+  :ClusterIP Service oluşturma;
+  :/metrics endpoint'i ekleme;
+}
+
+partition "8. MONITORING STACK KURULUMU" {
+  :Prometheus StatefulSet deployment;
+  :Prometheus ServiceMonitor/PodMonitor 
+  konfigürasyonu;
+  :K8s Service Discovery rules yazma;
+  :Grafana StatefulSet deployment;
+  :Grafana dashboard JSON'larını 
+  ConfigMap'e ekleme;
+  :AlertManager deployment ve alert rules;
+  :Postgres exporter deployment;
+  :Redis exporter deployment;
+  :Node exporter DaemonSet;
+}
+
+partition "9. NETWORK VE GÜVENLİK" {
+  :NGINX Ingress rules oluşturma;
+  note right
+    signaling.coturn.io → NEXRTC Service
+    turn.coturn.io → COTURN Services
+  end note
+  :TLS certificate management;
+  :Network policies oluşturma;
+  :RBAC rules (Prometheus için K8s API access);
+  :SecurityContext ayarları;
+}
+
+partition "10. DOCKER IMAGE BUILD VE PUSH" {
+  :NEXRTC Docker image build ve push;
+  :ADMIN Docker image build ve push;
+  :COTURN-NODE Docker image build ve push;
+  :Shared library dependencies'leri 
+  image'lara embed etme;
+  :Multi-arch build support;
+}
+
+partition "11. DEPLOYMENT VE TEST" {
+  :PostgreSQL deployment ve test;
+  :Redis deployment ve test;
+  :COTURN nodes deployment ve 
+  registration test;
+  :ADMIN deployment ve COTURN 
+  management test;
+  :NEXRTC deployment ve WebRTC 
+  functionality test;
+  :End-to-end video call test;
+  :Monitoring stack test ve 
+  metrics verification;
+}
+
+partition "12. PRODUCTION HAZIRLIK" {
+  :Resource limits ve requests ayarlama;
+  :HPA konfigürasyonu (COTURN nodes için);
+  :Backup strategy (PostgreSQL, Redis);
+  :Log aggregation (ELK/Fluentd);
+  :Health checks ve liveness probes;
+  :Rolling update strategy ayarlama;
+}
+
+partition "13. MIGRATION CUTOVER" {
+  :DNS update (domain'ları K8s 
+  cluster'a yönlendirme);
+  :Load testing;
+  :Monitoring alerts test;
+  :Rollback plan hazırlama;
+  :Docker Compose ortamını kapatma;
+}
+
+partition "14. POST-MIGRATION" {
+  :Performance monitoring ve optimization;
+  :Cost optimization;
+  :Auto-scaling policies fine-tuning;
+  :Documentation update;
+  :Team training (kubectl, monitoring tools);
+}
+
+partition "15. SCRIPT VE AUTOMATION" {
+  :scripts/k8s-deploy.sh script'ini güncelleme;
+  :CI/CD pipeline kurulumu;
+  :Helm Chart preparation;
+  :Infrastructure as Code (Terraform);
+}
+
+stop
+
+@enduml

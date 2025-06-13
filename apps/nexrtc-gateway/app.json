@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.nextrtcvideocall"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.nextrtcvideocall"
+  }
+}

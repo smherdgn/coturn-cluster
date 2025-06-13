@@ -1,0 +1,160 @@
+@startuml
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam componentStyle rectangle
+
+title HEDEF MİMARİ: KUBERNETES COTURN-CLUSTER + NEXRTC ENTEGRASYONU
+
+package "INTERNET" {
+  [Web Clients] as clients
+  [Mobile Clients] as mobile
+}
+
+package "KUBERNETES CLUSTER" {
+  
+  package "NGINX INGRESS (LoadBalancer)" {
+    component "NGINX" as nginx {
+      port "signaling.coturn.io" as signal_port
+      port "turn.coturn.io" as turn_port
+    }
+    note right of nginx : TLS Terminasyon\nYük Dengeleme\nSADECE EXTERNAL
+  }
+  
+  package "APPLICATION LAYER" {
+    component "NEXRTC-VIDEO-CALL" as nexrtc {
+      port ":8080" as nexrtc_port
+      port "/metrics" as nexrtc_metrics
+      note right : Next.js WebRTC\nJWT Auth\nSADECE EXTERNAL ACCESS
+    }
+    
+    component "ADMIN" as admin {
+      port ":8080" as admin_port  
+      port "/metrics" as admin_metrics
+      note right : Express.js\nDIŞA KAPALI\nClusterIP ONLY\nCOTURN Management\nkubectl port-forward
+    }
+    
+    package "COTURN NODES" {
+      component "COTURN-N1" as coturn1 {
+        port ":3478" as coturn1_turn
+        port ":9100" as coturn1_metrics
+        component "agent.ts" as agent1
+      }
+      
+      component "COTURN-N2" as coturn2 {
+        port ":3478" as coturn2_turn  
+        port ":9100" as coturn2_metrics
+        component "agent.ts" as agent2
+      }
+      
+      component "COTURN-N..." as coturnN {
+        port ":3478" as coturnN_turn
+        port ":9100" as coturnN_metrics  
+        component "agent.ts" as agentN
+      }
+    }
+  }
+  
+  package "DATA LAYER" {
+    database "POSTGRESQL\n(TEK SHARED INSTANCE)" as postgres {
+      port ":5432" as pg_port
+      folder "nexrtc_db" {
+        [users]
+        [sessions] 
+        [rooms]
+        [call_logs]
+        [jwt_tokens]
+        note bottom : NEXRTC İÇİN ÖZEL
+      }
+      folder "admin_db" {
+        [nodes]
+        [configs]
+        [admin_users]
+        [system_logs]
+        note bottom : ADMIN İÇİN ÖZEL
+      }
+    }
+    
+    database "REDIS\n(Internal Only)" as redis {
+      port ":6379" as redis_port
+      note right : SADECE COTURN\nNODE ↔ ADMIN\nLogs/Health\nRegistration\nCommands\nConfig Updates
+    }
+  }
+  
+  package "MONITORING STACK (Internal Only)" {
+    component "PROMETHEUS" as prometheus {
+      port ":9090" as prom_port
+      port "/metrics" as prom_metrics
+      note bottom : K8s Service Discovery\nAuto-discover all /metrics
+    }
+    
+    component "GRAFANA" as grafana {
+      port ":3000" as grafana_port
+      note right : kubectl port-forward\nsvc/grafana 3000:3000\nDIŞA KAPALI
+    }
+    
+    component "ALERTMANAGER" as alertmanager {
+      port ":9093" as alert_port
+      port "/metrics" as alert_metrics
+      note right : kubectl port-forward\nDIŞA KAPALI
+    }
+  }
+}
+
+' External Connections
+clients --> nginx : HTTPS
+mobile --> nginx : HTTPS
+nginx::signal_port --> nexrtc::nexrtc_port : signaling.coturn.io
+nginx::turn_port --> coturn1::coturn1_turn : turn.coturn.io
+nginx::turn_port --> coturn2::coturn2_turn : turn.coturn.io  
+nginx::turn_port --> coturnN::coturnN_turn : turn.coturn.io
+
+' Database Connections (TEK PostgreSQL - AYRI DB'ler)
+nexrtc --> postgres : nexrtc_db\nJWT, Users, Calls, Rooms
+admin --> postgres : admin_db\nNodes, Config, Admin Users
+
+' Redis Communication (SADECE COTURN ↔ ADMIN)
+agent1 --> redis : Health/Logs/Registration
+agent2 --> redis : Health/Logs/Registration
+agentN --> redis : Health/Logs/Registration
+admin --> redis : Commands/Control/Config
+
+' Monitoring (All services expose /metrics)
+prometheus --> nexrtc::nexrtc_metrics : K8s Service Discovery
+prometheus --> admin::admin_metrics : K8s Service Discovery
+prometheus --> coturn1::coturn1_metrics : K8s Service Discovery
+prometheus --> coturn2::coturn2_metrics : K8s Service Discovery
+prometheus --> coturnN::coturnN_metrics : K8s Service Discovery
+prometheus --> postgres : postgres_exporter:9187/metrics
+prometheus --> redis : redis_exporter:9121/metrics
+
+grafana <-- prometheus : Internal Dashboard
+alertmanager <-- prometheus : Alert Rules
+
+' NO COMMUNICATION (İZOLE SERVİSLER)
+nexrtc -[hidden]-> admin
+note on link : ❌ HİÇBİR İLETİŞİM YOK\nTAMAMEN İZOLE
+
+' Service Types
+note top of nginx : LoadBalancer\n(SADECE EXTERNAL)
+
+note top of nexrtc : ClusterIP\n(via Ingress)\nExternal Access
+
+note top of admin : ClusterIP\n(DIŞA KAPALI)\nkubectl port-forward\nInternal Only
+
+note top of postgres : ClusterIP\n(Internal Only)\nTEK INSTANCE\nÇİFT DATABASE
+
+note top of redis : ClusterIP\n(Internal Only)\nSADECE COTURN-ADMIN
+
+note top of prometheus : ClusterIP\n(Internal Only)\nService Discovery
+
+note top of grafana : ClusterIP\n(DIŞA KAPALI)\nkubectl port-forward
+
+' Access Methods
+note bottom of admin : ADMIN ERİŞİM:\nkubectl port-forward\nsvc/admin 8080:8080
+
+note bottom of grafana : MONITORING ERİŞİM:\nkubectl port-forward\nsvc/grafana 3000:3000\nkubectl port-forward\nsvc/prometheus 9090:9090
+
+' Database Schema Separation
+note bottom of postgres : AYRI SCHEMA'LAR:\nnexrtc_db (NEXRTC veriler)\nadmin_db (ADMIN veriler)\nAynı instance, farklı DB'ler
+
+@enduml

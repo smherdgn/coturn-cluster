@@ -21,6 +21,24 @@ services:
     environment:
       - NODE_ENV=development
 
+  nexrtc-gateway:
+    build:
+      context: .
+      dockerfile: apps/nexrtc-gateway/Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgres://coturn:coturn@postgres:5432/coturn_db
+      - JWT_SECRET=supersecretjwtkey  # gerekiyorsa
+      - TURN_API_URL=http://coturn-node:8100  # gerekiyorsa
+
   redis:
     image: redis:7
     ports:
