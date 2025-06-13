@@ -1,3 +1,36 @@
+# Layout'u AuthProvider olmadan test et
+cat > src/app/layout.tsx << 'EOF'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "NextRTC Video Call",
+  description: "Secure WebRTC video calling application",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${inter.className} bg-background text-text min-h-screen flex flex-col`}>
+        {children}
+      </body>
+    </html>
+  );
+}
+EOF
+
+# Test et
+next build
+
+# Eğer çalışırsa AuthProvider'daki useRouter'ı düzelt
+cat > src/contexts/AuthContext.tsx << 'EOF'
 "use client";
 
 import React, {
@@ -177,3 +210,40 @@ export function useAuth() {
   }
   return context;
 }
+EOF
+
+# Layout'u geri ekle
+cat > src/app/layout.tsx << 'EOF'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "@/components/ui/Toaster";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "NextRTC Video Call",
+  description: "Secure WebRTC video calling application",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${inter.className} bg-background text-text min-h-screen flex flex-col`}>
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
+EOF
+
+# Final test
+next build

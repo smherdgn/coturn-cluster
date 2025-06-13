@@ -3,6 +3,7 @@ import { getConfigValue, setConfigValue } from '@/lib/config';
 import { JWT_SECRET } from '@/lib/authUtils';
 import jwt from 'jsonwebtoken';
 import type { User } from '@/types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {

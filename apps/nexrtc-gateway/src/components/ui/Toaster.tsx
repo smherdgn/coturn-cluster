@@ -48,7 +48,7 @@ export function Toaster() {
           key={toast.id}
           className={`p-4 rounded-md shadow-lg text-white ${
             toast.type === 'success' ? 'bg-green-500' :
-            toast.type === 'error' ? 'bg-danger' :
+            toast.type === 'error' ? 'bg-red-500' :
             'bg-blue-500'
           }`}
         >

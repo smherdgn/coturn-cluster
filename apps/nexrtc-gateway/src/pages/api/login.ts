@@ -12,11 +12,7 @@ import { getConfigValue } from "@/lib/config";
 import { logger } from "@/lib/logger";
 import { isRateLimited } from "@/lib/rateLimiter";
 import { logEvent } from "@/lib/logEvent";
-
- // Dummy user for demonstration
-const DEMO_USER_EMAIL = "user@example.com";
-const DEMO_USER_PASSWORD = "password123";
-const ADMIN_USER_PASSWORD = "adminpassword123"; // Separate admin password for demo
+ 
  
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

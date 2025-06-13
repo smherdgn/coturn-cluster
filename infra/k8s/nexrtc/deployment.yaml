@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexrtc-gateway
+  namespace: nexrtc-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexrtc-gateway
+  template:
+    metadata:
+      labels:
+        app: nexrtc-gateway
+    spec:
+      containers:
+      - name: nexrtc-gateway
+        image: nexrtc-gateway:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nexrtc-secrets
+              key: JWT_SECRET
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: nexrtc-secrets
+              key: POSTGRES_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: nexrtc-secrets
+              key: REDIS_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexrtc-gateway
+  namespace: nexrtc-system
+spec:
+  selector:
+    app: nexrtc-gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
