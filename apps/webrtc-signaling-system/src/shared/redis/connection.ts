@@ -10,8 +10,7 @@ export const redisClient: RedisClient = createClient({
   url: config.redis.url,
   socket: {
     connectTimeout: config.redis.connectTimeout,
-    lazyConnect: true,
-    reconnectStrategy: (retries) => {
+     reconnectStrategy: (retries) => {
       if (retries > 10) {
         logger.error('Redis: Max reconnection attempts reached');
         return new Error('Max reconnection attempts reached');
@@ -21,7 +20,7 @@ export const redisClient: RedisClient = createClient({
       return delay;
     },
   },
-  password: config.redis.password || undefined,
+  ...(config.redis.password && { password: config.redis.password }),
 });
 
 // Redis event handlers

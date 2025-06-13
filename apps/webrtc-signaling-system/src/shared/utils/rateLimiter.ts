@@ -78,7 +78,7 @@ export class RateLimiter {
             if ((this.options.skipSuccessfulRequests && isSuccess) ||
                 (this.options.skipFailedRequests && isFailure)) {
               // Compensate for the increment by decrementing
-              rateLimitService.rateLimitService.cache.increment(`ratelimit:${key}`, -1)
+              rateLimitService.getCache().increment(`ratelimit:${key}`, -1)
                 .catch(error => logger.error('Failed to adjust rate limit counter', error));
             }
           });

@@ -97,7 +97,7 @@ winston.addColors(customLevels.colors);
 
 // Enhanced logging methods
 export class Logger {
-  private context?: string;
+  private context: string | undefined;
 
   constructor(context?: string) {
     this.context = context;

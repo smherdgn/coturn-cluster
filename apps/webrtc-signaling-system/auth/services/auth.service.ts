@@ -1,14 +1,14 @@
 import { eq, and } from 'drizzle-orm';
-import { db } from '../../shared/database/connection';
-import { users, refreshTokens } from '../../shared/database/schema';
-import { redisClient } from '../../shared/redis/connection';
-import { User } from '../../shared/types/user';
+import { db } from '../../src/shared/database/connection';
+import { users, refreshTokens } from '../../src/shared/database/schema';
+import { redisClient } from '../../src/shared/redis/connection';
+import { User } from '../../src/shared/types/user';
 import { createUser, findUserByEmail, findUserById } from './user.service';
 import { comparePassword } from '../utils/password';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
-import { logger } from '../../shared/utils/logger';
+import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } from '../utils/jwt';
+import { logger } from '../../src/shared/utils/logger';
 import { v4 as uuidv4 } from 'uuid';
-
+ 
 interface AuthTokens {
   access: string;
   refresh: string;
@@ -45,7 +45,7 @@ export async function register(email: string, password: string, name: string): P
     });
 
     // Cache user session in Redis (15 minutes - same as access token)
-    await redisClient.setex(`user_session:${user.id}`, 900, JSON.stringify(user));
+    await redisClient.setEx(`user_session:${user.id}`, 900, JSON.stringify(user));
 
     logger.info(`User registered and logged in: ${email}`);
 
@@ -92,7 +92,7 @@ export async function login(email: string, password: string): Promise<AuthResult
 
     // Cache user session in Redis
     const { password: _, ...userWithoutPassword } = user;
-    await redisClient.setex(`user_session:${user.id}`, 900, JSON.stringify(userWithoutPassword));
+    await redisClient.setEx(`user_session:${user.id}`, 900, JSON.stringify(userWithoutPassword));
 
     logger.info(`User logged in: ${email}`);
 
@@ -141,7 +141,7 @@ export async function refreshToken(refreshTokenValue: string): Promise<{ accessT
     const accessToken = generateAccessToken(user.id, user.email);
 
     // Update user session cache in Redis
-    await redisClient.setex(`user_session:${user.id}`, 900, JSON.stringify(user));
+    await redisClient.setEx(`user_session:${user.id}`, 900, JSON.stringify(user));
 
     logger.info(`Token refreshed for user: ${user.email}`);
 
@@ -178,37 +178,45 @@ export async function logout(refreshTokenValue: string): Promise<void> {
   }
 }
 
-export async function validateToken(accessToken: string): Promise<{ valid: boolean; user?: User }> {
+export async function validateToken(accessToken: string): Promise<{
+  email: any;
+  id: any; valid: boolean; user?: User 
+}> {
   try {
     const payload = verifyAccessToken(accessToken);
     if (!payload) {
-      return { valid: false };
+      return { valid: false, email: null, id: null };
     }
 
     // Try to get user from Redis cache first
     const cachedUser = await redisClient.get(`user_session:${payload.userId}`);
     if (cachedUser) {
+      const user = JSON.parse(cachedUser);
       return {
         valid: true,
-        user: JSON.parse(cachedUser)
+        user: user,
+        email: user.email,
+        id: user.id
       };
     }
 
     // If not in cache, get from database
     const user = await findUserById(payload.userId);
     if (!user) {
-      return { valid: false };
+      return { valid: false, email: null, id: null };
     }
 
     // Cache the user for future requests
-    await redisClient.setex(`user_session:${user.id}`, 900, JSON.stringify(user));
+    await redisClient.setEx(`user_session:${user.id}`, 900, JSON.stringify(user));
 
     return {
       valid: true,
-      user
+      user,
+      email: user.email,
+      id: user.id
     };
   } catch (error) {
     logger.error('Token validation error:', error);
-    return { valid: false };
+    return { valid: false, email: null, id: null };
   }
 }

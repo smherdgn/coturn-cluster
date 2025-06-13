@@ -118,7 +118,7 @@ export const securityConfig = {
       max: config.rateLimit.max,
       timeWindow: config.rateLimit.windowMs,
       allowList: ['127.0.0.1', '::1'], // Localhost exemption
-      errorResponseBuilder: (request: any, context: any) => ({
+      errorResponseBuilder: (_request: any, context: any) => ({
         success: false,
         error: 'Too many requests, please try again later',
         code: 'RATE_LIMIT_EXCEEDED',
@@ -193,8 +193,8 @@ export const staticSecurityHeaders = {
     'camera=self',
     'microphone=self',
     'display-capture=self',
-    'geolocation=(),
-    'payment=(),
+    'geolocation=()',
+    'payment=()',
     'usb=()',
   ].join(', '),
 } as const;

@@ -76,7 +76,7 @@ async function registerPlugins(): Promise<void> {
   await fastify.register(rateLimit, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.windowMs,
-    errorResponseBuilder: (request, context) => ({
+    errorResponseBuilder: (_request, context) => ({
       success: false,
       error: 'Rate limit exceeded',
       code: 'RATE_LIMIT_EXCEEDED',
@@ -89,7 +89,7 @@ async function registerPlugins(): Promise<void> {
 }
 
 // Health check route
-fastify.get('/health', async (request, reply) => {
+fastify.get('/health', async (_request, reply) => {
   const [dbHealth, redisHealth] = await Promise.all([
     checkDatabaseHealth(),
     checkRedisHealth(),
@@ -106,14 +106,14 @@ fastify.get('/health', async (request, reply) => {
       database: dbHealth ? 'healthy' : 'unhealthy',
       redis: redisHealth ? 'healthy' : 'unhealthy',
     },
-    version: process.env.npm_package_version || '1.0.0',
+    version: process.env['npm_package_version'] || '1.0.0',
   };
 
   return reply.status(statusCode).send(response);
 });
 
 // API routes placeholder
-fastify.get('/api/v1/status', async (request, reply) => {
+fastify.get('/api/v1/status', async (_request, reply) => {
   return reply.send({
     success: true,
     message: 'WebRTC Signaling Server API is running',
@@ -123,7 +123,7 @@ fastify.get('/api/v1/status', async (request, reply) => {
 });
 
 // 404 handler
-fastify.setNotFoundHandler(async (request, reply) => {
+fastify.setNotFoundHandler(async (_request, reply) => {
   return reply.status(HTTP_STATUS.NOT_FOUND).send({
     success: false,
     error: 'Route not found',
@@ -167,12 +167,12 @@ async function setupSocketIO(): Promise<void> {
   }
 
   // Socket.IO middleware for rate limiting
-  io.use(async (socket: AuthenticatedSocket, next) => {
+  io.use(async (socket, next) => {
     const clientIP = socket.handshake.address;
-    socket.rateLimitIdentifier = `socket:${clientIP}`;
+    (socket as AuthenticatedSocket).rateLimitIdentifier = `socket:${clientIP}`;
     
     // Add basic properties
-    socket.isAuthenticated = false;
+    (socket as AuthenticatedSocket).isAuthenticated = false;
     
     serverLogger.debug(`Socket connection attempt from ${clientIP}`, {
       socketId: socket.id,
@@ -183,41 +183,42 @@ async function setupSocketIO(): Promise<void> {
   });
 
   // Connection event handler
-  io.on(SOCKET_EVENTS.CONNECTION, (socket: AuthenticatedSocket) => {
-    serverLogger.info(`Socket connected: ${socket.id}`);
+  io.on(SOCKET_EVENTS.CONNECTION, (socket) => {
+    const authenticatedSocket = socket as AuthenticatedSocket;
+    serverLogger.info(`Socket connected: ${authenticatedSocket.id}`);
 
     // Handle disconnection
-    socket.on(SOCKET_EVENTS.DISCONNECT, (reason) => {
-      serverLogger.info(`Socket disconnected: ${socket.id}`, { reason });
+    authenticatedSocket.on(SOCKET_EVENTS.DISCONNECT, (reason) => {
+      serverLogger.info(`Socket disconnected: ${authenticatedSocket.id}`, { reason });
       
       // Cleanup user session if authenticated
-      if (socket.isAuthenticated && socket.user) {
+      if (authenticatedSocket.isAuthenticated && authenticatedSocket.user) {
         // TODO: Implement session cleanup
-        serverLogger.debug(`Cleaning up session for user: ${socket.user.id}`);
+        serverLogger.debug(`Cleaning up session for user: ${authenticatedSocket.user.id}`);
       }
     });
 
     // Handle connection errors
-    socket.on('error', (error) => {
-      serverLogger.error(`Socket error for ${socket.id}:`, error);
+    authenticatedSocket.on('error', (error) => {
+      serverLogger.error(`Socket error for ${authenticatedSocket.id}:`, error);
     });
 
     // Placeholder for auth module registration
     // TODO: Register auth event handlers
-    // Example: registerAuthHandlers(socket);
+    // Example: registerAuthHandlers(authenticatedSocket);
 
     // Placeholder for websocket module registration  
     // TODO: Register websocket event handlers
-    // Example: registerWebSocketHandlers(socket);
+    // Example: registerWebSocketHandlers(authenticatedSocket);
 
     // Placeholder for signaling module registration
     // TODO: Register signaling event handlers
-    // Example: registerSignalingHandlers(socket);
+    // Example: registerSignalingHandlers(authenticatedSocket);
 
     // Send welcome message
-    socket.emit('server:welcome', {
+    authenticatedSocket.emit('server:welcome', {
       message: 'Connected to WebRTC Signaling Server',
-      socketId: socket.id,
+      socketId: authenticatedSocket.id,
       timestamp: new Date(),
     });
   });
@@ -297,7 +298,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  serverLogger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  serverLogger.error('Unhandled Rejection', reason, { promise });
   process.exit(1);
 });
 

@@ -1,3 +1,4 @@
+// src/shared/config/index.ts - Fixed version
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
@@ -120,5 +121,5 @@ if (env.NODE_ENV === 'production') {
   console.log(`🔧 Running in ${env.NODE_ENV} mode`);
 }
 
-// Export security configuration
-export { securityConfig } from './security';
+// REMOVE THIS LINE - it's causing circular dependency:
+// export { securityConfig } from './security';

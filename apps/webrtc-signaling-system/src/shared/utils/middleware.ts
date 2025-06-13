@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
-import { ZodError } from 'zod';
+import {  ZodError } from 'zod';
 import { logger } from './logger';
 import { HTTP_STATUS, ERROR_CODES } from '../config/constants';
 import { config } from '../config';
@@ -71,9 +71,9 @@ export function createErrorHandler() {
     });
 
     // Handle specific error types
-    let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
-    let errorCode = ERROR_CODES.INTERNAL_ERROR;
-    let message = 'Internal Server Error';
+    let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let errorCode: string = ERROR_CODES.INTERNAL_ERROR;
+    let message:string = 'Internal Server Error';
     let details: any = undefined;
 
     if (error.validation) {
@@ -146,7 +146,7 @@ export async function securityHeaders(
   reply.header('X-Frame-Options', 'DENY');
   reply.header('X-XSS-Protection', '1; mode=block');
   reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+  request=request;
   // Add permissions policy for WebRTC features
   reply.header('Permissions-Policy', [
     'camera=self',
@@ -168,12 +168,14 @@ export function validateClientIP(request: FastifyRequest): string {
 
   if (forwardedFor) {
     const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    ip = ips.split(',')[0].trim();
+    ip = ips?.split(',')[0]?.trim() || ip;
   } else if (realIP) {
-    ip = Array.isArray(realIP) ? realIP[0] : realIP;
+     const resolvedIP = Array.isArray(realIP) ? realIP[0] : realIP;
+    ip = resolvedIP ?? ip;
   } else if (clientIP) {
-    ip = Array.isArray(clientIP) ? clientIP[0] : clientIP;
-  }
+    const resolvedIP = Array.isArray(clientIP) ? clientIP[0] : clientIP;
+    ip = resolvedIP ?? ip;
+   }
 
   // Validate IP format
   const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -188,7 +190,7 @@ export function validateClientIP(request: FastifyRequest): string {
 }
 
 // Request validation middleware
-export function createValidationMiddleware<T>(schema: any) {
+export function createValidationMiddleware(schema: any) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       const validatedData = schema.parse(request.body);
@@ -198,8 +200,7 @@ export function createValidationMiddleware<T>(schema: any) {
         const validationErrors = error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message,
-          value: err.input,
-        }));
+         }));
 
         reply.status(HTTP_STATUS.BAD_REQUEST).send({
           success: false,
@@ -268,7 +269,7 @@ export async function handlePreflight(
 
 // Health check middleware
 export async function healthCheck(
-  request: FastifyRequest,
+  _request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
   // Basic health indicators

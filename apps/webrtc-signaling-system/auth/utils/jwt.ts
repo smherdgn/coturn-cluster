@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { AccessTokenPayload, RefreshTokenPayload } from '../types';
-import { logger } from '../../shared/utils/logger';
+import { logger } from '../../src/shared/utils/logger';
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'your-access-secret-key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';

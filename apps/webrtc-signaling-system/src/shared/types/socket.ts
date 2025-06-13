@@ -1,7 +1,6 @@
 import { Socket } from 'socket.io';
 import { UserProfile, UserPermissions } from './user';
-import { RoomState } from './room';
-
+ 
 // Authenticated socket user
 export interface SocketUser {
   id: string;

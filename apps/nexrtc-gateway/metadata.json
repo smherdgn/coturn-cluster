@@ -1,8 +1,0 @@
-{
-  "name": "NextRTC Video Call",
-  "description": "A secure WebRTC video calling application built with Next.js, Socket.io, and JWT authentication, featuring peer-to-peer video and audio communication. Users can log in, enter a room, and establish video calls.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ]
-}

@@ -107,7 +107,7 @@ export function deepClone<T>(obj: T): T {
 }
 
 // Object pick utility
-export function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const result = {} as Pick<T, K>;
   for (const key of keys) {
     if (key in obj) {
@@ -233,15 +233,16 @@ export function getClientIP(headers: Record<string, string | string[] | undefine
 
   if (forwardedFor) {
     const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    return ips.split(',')[0].trim();
+    const splittedIps = ips?.split(',')[0]?.trim();
+    return splittedIps?splittedIps: 'unknown';
   }
 
   if (realIP) {
-    return Array.isArray(realIP) ? realIP[0] : realIP;
+    return Array.isArray(realIP) ? realIP[0]?realIP[0]:'unknown' : realIP;
   }
 
   if (clientIP) {
-    return Array.isArray(clientIP) ? clientIP[0] : clientIP;
+    return Array.isArray(clientIP) ? clientIP[0]?clientIP[0]:'unknown' : clientIP;
   }
 
   return 'unknown';

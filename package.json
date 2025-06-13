@@ -2,19 +2,18 @@
     "name": "coturn-cluster",
     "private": true,
     "workspaces": [
-      "apps/*",
-      "packages/*"
+        "apps/*",
+        "packages/*"
     ],
     "scripts": {
-      "dev": "turbo run dev --parallel",
-      "build": "turbo run build",
-      "clean": "rm -rf node_modules .turbo && yarn install",
-      "start": "node dist/server.js"
+        "dev": "turbo run dev --parallel",
+        "build": "turbo run build",
+        "clean": "rm -rf node_modules .turbo && yarn install",
+        "start": "node dist/server.js"
     },
     "devDependencies": {
-      "turbo": "^2.5.4",
-      "typescript": "^5.1.6"
+        "turbo": "^2.5.4",
+        "typescript": "^5.1.6"
     },
     "packageManager": "yarn@4.9.2"
-  }
-  
+}

@@ -185,7 +185,6 @@ export function createValidationMiddleware(schema: z.ZodSchema) {
         const validationErrors = error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message,
-          value: err.input,
         }));
 
         reply.status(400).send({

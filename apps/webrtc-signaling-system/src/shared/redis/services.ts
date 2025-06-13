@@ -318,6 +318,9 @@ export class RateLimitService {
     const key = `ratelimit:${identifier}`;
     return await this.cache.del(key);
   }
+public  getCache(): CacheService {
+    return this.cache;
+  }
 }
 
 // Export service instances

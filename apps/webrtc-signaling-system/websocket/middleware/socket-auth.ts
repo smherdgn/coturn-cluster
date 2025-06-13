@@ -1,7 +1,6 @@
-// ==========================================
 import type { Socket } from 'socket.io';
-import { validateToken } from '../../scripts/auth/services/auth.service.js';
-import { logger } from '../../shared/utils/logger.js';
+import { validateToken } from '../../auth/services/auth.service.js';
+import { logger } from '../../src/shared/utils/logger';
 
 export async function socketAuthMiddleware(socket: Socket, next: Function) {
   try {
@@ -45,4 +44,4 @@ export async function socketAuthMiddleware(socket: Socket, next: Function) {
   }
 }
 
-// ==========================================
+ 
