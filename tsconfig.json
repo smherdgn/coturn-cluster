@@ -1,15 +1,22 @@
 {
+  "files": [],
+  "references": [
+    { "path": "apps/admin" },
+    { "path": "apps/nexrtc-gateway" },
+    { "path": "packages/ui" }
+  ],
   "compilerOptions": {
     "target": "ES2020",
-    "module": "CommonJS",
-    "declaration": true,
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
-      "@coturn-cluster/shared": ["packages/shared/src"]
-    }
+      "@coturn/ui": ["packages/ui/src"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true
   }
 }

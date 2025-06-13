@@ -1,22 +1,15 @@
+// src/app/not-found.tsx
 export default function NotFound() {
   return (
-    <html>
-      <body>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          textAlign: 'center',
-          padding: '20px',
-          fontFamily: 'system-ui, sans-serif'
-        }}>
-          <h1>404</h1>
-          <p>Sayfa bulunamadı</p>
-          <a href="/">Ana Sayfaya Dön</a>
-        </div>
-      </body>
-    </html>
+    <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
+      <h1 className="text-5xl font-bold text-red-600 mb-4">404</h1>
+      <p className="text-lg text-gray-600 mb-6">Aradığınız sayfa bulunamadı.</p>
+      <a
+        href="/"
+        className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
+      >
+        Ana sayfaya dön
+      </a>
+    </div>
   );
 }

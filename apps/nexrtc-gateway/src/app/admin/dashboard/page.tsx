@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
   const renderSortIcon = (column: keyof LogEntry | string) => {
     if (sortBy.column !== column)
       return <ArrowDownUp size={14} className="ml-1 opacity-30" />;
-    return sortBy.order === "desc" ? "▼" : "▲";
+    return <span>{sortBy.order === "desc" ? "▼" : "▲"}</span>;
   };
 
   return (
