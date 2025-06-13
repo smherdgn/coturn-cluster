@@ -1,61 +1,682 @@
-# Node.js
+# ==========================================
+# 🚀 BOOKMEZA MONOREPO .GITIGNORE
+# ==========================================
+# Multi-tenant SaaS appointment booking platform
+# Next.js + React + TypeScript + Tailwind + Supabase
+# Foundation components + Business logic + Apps
+# ==========================================
+
+# ==========================================
+# 📦 NODE.JS & PACKAGE MANAGERS
+# ==========================================
+
+# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-yarn.lock
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Output
-dist/
-build/
+# Package manager lock files (keep only one type)
+# Uncomment the ones you DON'T use:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Package manager cache
+.npm
+.yarn/
+.pnpm/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Workspaces
+.pnp.*
+
+# ==========================================
+# ⚛️ REACT & NEXT.JS
+# ==========================================
+
+# Next.js build output
+.next/
 out/
-coverage/
-storybook-static/
+
+# Production builds
+build/
+dist/
 *.tsbuildinfo
 
-# Logs
-logs
-*.log
-*.log.*
+# Static generation
+.vercel/
+.netlify/
+.firebase/
 
-# Env
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Next.js cache
+.next/cache/
+
+# SWC cache
+.swc/
+
+# ==========================================
+# 📱 REACT NATIVE & EXPO (for mobile app)
+# ==========================================
+
+# Expo
+.expo/
+.expo-shared/
+expo-env.d.ts
+
+# React Native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Metro bundler
+.metro-health-check*
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Android
+*.apk
+*.aab
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/release/
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/project.pbxproj
+ios/*.xcodeproj/xcuserdata/
+ios/Podfile.lock
+
+# ==========================================
+# 🎨 DESIGN SYSTEM & STORYBOOK
+# ==========================================
+
+# Storybook build
+storybook-static/
+.out/
+.build-storybook/
+
+# Design tokens build
+design-tokens/dist/
+design-tokens/build/
+
+# Theme exports
+themes/generated/
+themes/dist/
+
+# Chromatic
+chromatic-*
+
+# ==========================================
+# 🌍 INTERNATIONALIZATION
+# ==========================================
+
+# Translation builds
+i18n/dist/
+locales/compiled/
+translations/build/
+
+# Translation memory
+*.tmx
+*.po~
+*.pot~
+
+# Weblate or Crowdin
+.crowdin/
+.weblate/
+
+# ==========================================
+# 🧪 TESTING
+# ==========================================
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Jest
+jest-coverage/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cypress
+cypress/downloads/
+cypress/screenshots/
+cypress/videos/
+
+# Visual regression testing
+__diff_output__/
+__screenshots__/
+
+# E2E testing artifacts
+test-artifacts/
+
+# ==========================================
+# 📊 DEVELOPMENT TOOLS
+# ==========================================
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+
+# ESLint
+.eslintcache
+
+# Prettier
+.prettiercache
+
+# Turborepo
+.turbo/
+
+# Rush
+common/temp/
+common/deploy/
+
+# Lerna
+.lerna/
+
+# ==========================================
+# 🔐 ENVIRONMENT & SECRETS
+# ==========================================
+
+# Environment files
 .env
-.env.local
-.env.*.local
-.env.test
+.env.*
+!.env.example
+!.env.template
 
-# IDE & OS
+# Environment-specific configs
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+
+# Supabase secrets
+supabase/.env
+supabase/config.toml
+
+# API keys and secrets
+secrets/
+.secrets/
+keys/
+certificates/
+
+# Service account files
+*-service-account.json
+*-firebase-adminsdk-*.json
+
+# ==========================================
+# ☁️ CLOUD & DEPLOYMENT
+# ==========================================
+
+# Vercel
+.vercel/
+.now/
+
+# Netlify
+.netlify/
+
+# AWS
+.aws/
+.awspublish-*
+
+# Google Cloud
+.gcloud/
+
+# Docker
+.dockerignore.bak
+docker-compose.override.yml
+
+# Kubernetes
+*.kubeconfig
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+
+# ==========================================
+# 📚 DATABASE & SUPABASE
+# ==========================================
+
+# Supabase
+supabase/logs/
+supabase/postgres_logs/
+supabase/.temp/
+
+# Database dumps
+*.sql.gz
+*.dump
+database-dumps/
+
+# Migration backups
+migrations/backup/
+
+# Seed data (if contains sensitive info)
+# seeds/production/
+
+# ==========================================
+# 📖 DOCUMENTATION
+# ==========================================
+
+# Generated docs
+docs/build/
+docs/dist/
+docs/.docusaurus/
+docs/.cache/
+
+# API documentation
+api-docs/generated/
+
+# Typedoc
+typedoc-output/
+
+# ==========================================
+# 🎬 MEDIA & ASSETS
+# ==========================================
+
+# Large media files
+*.mov
+*.mp4
+*.avi
+*.wmv
+*.flv
+*.webm
+
+# High-res images (keep optimized versions)
+*-original.*
+*-source.*
+*.psd
+*.ai
+*.sketch
+
+# Audio files
+*.wav
+*.mp3
+*.ogg
+*.flac
+
+# Temporary uploads
+uploads/temp/
+temp-assets/
+
+# ==========================================
+# 📱 MOBILE SPECIFIC
+# ==========================================
+
+# React Native
+.react-native/
+
+# Flipper
+.flipper/
+
+# Buck
+buck-out/
+
+# Watchman
+.watchman-config
+.watchmanconfig
+
+# Android Studio
+.idea/
+*.iml
+.gradle/
+local.properties
+
+# ==========================================
+# 🛠️ MONOREPO SPECIFIC
+# ==========================================
+
+# Workspace artifacts
+packages/*/dist/
+packages/*/build/
+packages/*/lib/
+packages/*/.next/
+packages/*/storybook-static/
+
+# Apps artifacts
+apps/*/dist/
+apps/*/build/
+apps/*/.next/
+apps/*/out/
+
+# Tools artifacts
+tools/*/dist/
+tools/*/build/
+
+# Shared library builds
+libs/*/dist/
+libs/*/build/
+
+# Internal packages
+packages/@bookmeza/*/dist/
+packages/@bookmeza/*/build/
+
+# ==========================================
+# 🔍 ANALYTICS & MONITORING
+# ==========================================
+
+# Bundle analyzer
+.bundle-analyzer/
+bundle-report.html
+
+# Lighthouse CI
+.lighthouseci/
+
+# Performance monitoring
+perf-reports/
+
+# Error tracking
+sentry.properties
+
+# ==========================================
+# 💻 OPERATING SYSTEM
+# ==========================================
+
+# macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ==========================================
+# 🎯 IDE & EDITORS
+# ==========================================
+
+# VSCode
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# WebStorm / IntelliJ
 .idea/
 *.swp
 *.swo
 
-# Turbo repo
-turbo/
-turbo-out/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ==========================================
+# 🏗️ BUILD TOOLS & BUNDLERS
+# ==========================================
+
+# Webpack
+.webpack/
+
+# Rollup
+rollup-cache/
+
+# Parcel
+.parcel-cache/
 .cache/
 
-# TypeScript
-*.d.ts
-*.d.ts.map
-tsconfig.tsbuildinfo
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
-# Jest
+# SWC
+.swc/
+
+# esbuild
+.esbuild/
+
+# ==========================================
+# 📊 LOGS & DEBUGGING
+# ==========================================
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+
+# Runtime logs
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
 coverage/
-jest-test-results.json
+*.lcov
 
-# Mac
-__MACOSX
+# Nyc test coverage
+.nyc_output/
 
-# Others
-*.tgz
+# Debug logs
+debug.log
+error.log
+access.log
+
+# ==========================================
+# 🎪 TEMPORARY & CACHE
+# ==========================================
+
+# Temporary folders
+tmp/
+temp/
+.temp/
+.tmp/
+
+# Cache directories
+.cache/
+*.cache/
+
+# Backup files
 *.bak
+*.backup
+*.old
 *.orig
-*.turbo
-# Ignore duplicated nested packages (buggy structure)
-packages/**/node_modules/
-packages/**/dist/
-apps/**/node_modules/
-apps/**/dist/
+
+# Generated files
+generated/
+auto-generated/
+
+# ==========================================
+# 🔧 PACKAGE-SPECIFIC IGNORES
+# ==========================================
+
+# Foundation Components
+packages/foundation-components/dist/
+packages/foundation-components/storybook-static/
+
+# Design Tokens
+packages/design-tokens/dist/
+packages/design-tokens/css/
+packages/design-tokens/js/
+
+# i18n Package
+packages/i18n/dist/
+packages/i18n/locales/compiled/
+
+# Business Components
+packages/business-components/dist/
+packages/business-components/storybook-static/
+
+# Main App
+apps/booking-platform/.next/
+apps/booking-platform/out/
+
+# Admin Dashboard
+apps/admin-dashboard/.next/
+apps/admin-dashboard/out/
+
+# Mobile App
+apps/mobile-app/.expo/
+apps/mobile-app/build/
+
+# Landing Page
+apps/landing-page/.next/
+apps/landing-page/out/
+
+# ==========================================
+# 🎨 DESIGN & ASSETS (KEEP THESE)
+# ==========================================
+
+# Keep design system assets
+!packages/design-tokens/assets/
+!packages/foundation-components/assets/
+!apps/*/public/
+
+# Keep documentation images
+!docs/images/
+!docs/assets/
+!*.md
+!*.mdx
+
+# Keep configuration examples
+!*.example.*
+!*.template.*
+!*.sample.*
+
+# ==========================================
+# 🚀 DEPLOYMENT ARTIFACTS
+# ==========================================
+
+# Deployment builds
+release/
+releases/
+deploy/
+deployment/
+
+# Static exports
+static-export/
+
+# CDN assets (generated)
+cdn/
+assets-cdn/
+
+# Compressed bundles
+*.tar.gz
+*.zip
+*.7z
+
+# ==========================================
+# 📋 PROJECT-SPECIFIC
+# ==========================================
+
+# Bookmeza specific
+booking-data/
+customer-uploads/
+appointment-exports/
+
+# Feature flags
+feature-flags.json
+.feature-flags/
+
+# A/B testing
+experiments/
+.experiments/
+
+# Analytics data
+analytics-data/
+.analytics/
+
+# Performance benchmarks
+benchmarks/results/
+performance-reports/
+
+# Security scans
+security-reports/
+vulnerability-reports/
+
+# ==========================================
+# 📝 NOTES & COMMENTS
+# ==========================================
+
+# This .gitignore is designed for the Bookmeza monorepo
+# which includes:
+#
+# 📦 Packages:
+#   - @bookmeza/foundation-components
+#   - @bookmeza/business-components  
+#   - @bookmeza/design-tokens
+#   - @bookmeza/i18n
+#   - @bookmeza/utils
+#
+# 🏢 Apps:
+#   - booking-platform (main SaaS app)
+#   - admin-dashboard (business management)
+#   - mobile-app (React Native)
+#   - landing-page (marketing site)
+#
+# 🛠️ Tools:
+#   - build scripts
+#   - deployment tools
+#   - development utilities
+#
+# Remember to:
+# - Keep .env.example files for documentation
+# - Include important README.md files
+# - Preserve configuration templates
+# - Document any project-specific exclusions
+
+# ==========================================
+# 🎯 END OF BOOKMEZA MONOREPO .GITIGNORE
+# ==========================================
