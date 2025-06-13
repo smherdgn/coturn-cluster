@@ -1,0 +1,2 @@
+finaltest:pass123:example.com
+user2:pass456:example.com

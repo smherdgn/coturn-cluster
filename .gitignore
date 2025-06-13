@@ -1,0 +1,61 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+.pnpm-debug.log*
+
+# Output
+dist/
+build/
+out/
+coverage/
+storybook-static/
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+*.log.*
+
+# Env
+.env
+.env.local
+.env.*.local
+.env.test
+
+# IDE & OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Turbo repo
+turbo/
+turbo-out/
+.cache/
+
+# TypeScript
+*.d.ts
+*.d.ts.map
+tsconfig.tsbuildinfo
+
+# Jest
+coverage/
+jest-test-results.json
+
+# Mac
+__MACOSX
+
+# Others
+*.tgz
+*.bak
+*.orig
+*.turbo
+# Ignore duplicated nested packages (buggy structure)
+packages/**/node_modules/
+packages/**/dist/
+apps/**/node_modules/
+apps/**/dist/

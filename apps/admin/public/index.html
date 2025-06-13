@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coturn Cluster Management</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎛️</text></svg>">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">🎛️ Coturn Cluster</div>
+                <div class="sidebar-subtitle">Management Dashboard</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">Dashboard</div>
+                    <a href="#" class="nav-item active" data-page="overview">
+                        <span class="icon">📊</span>
+                        Overview
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Cluster Management</div>
+                    <a href="#" class="nav-item" data-page="nodes">
+                        <span class="icon">🖥️</span>
+                        Nodes
+                    </a>
+                    <a href="#" class="nav-item" data-page="services">
+                        <span class="icon">🔧</span>
+                        Services
+                    </a>
+                    <a href="#" class="nav-item" data-page="load-balancer">
+                        <span class="icon">⚖️</span>
+                        Load Balancer
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Infrastructure</div>
+                    <a href="#" class="nav-item" data-page="database">
+                        <span class="icon">🗄️</span>
+                        Database
+                    </a>
+                    <a href="#" class="nav-item" data-page="redis">
+                        <span class="icon">📦</span>
+                        Redis Cache
+                    </a>
+                    <a href="#" class="nav-item" data-page="monitoring">
+                        <span class="icon">📈</span>
+                        Monitoring
+                    </a>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-group-title">Operations</div>
+                    <a href="#" class="nav-item" data-page="logs">
+                        <span class="icon">📜</span>
+                        Logs
+                    </a>
+                    <a href="#" class="nav-item" data-page="config">
+                        <span class="icon">⚙️</span>
+                        Configuration
+                    </a>
+                    <a href="#" class="nav-item" data-page="security">
+                        <span class="icon">🔒</span>
+                        Security
+                    </a>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Overview Page -->
+            <div id="overview-page" class="page-content active">
+                <div class="page-header">
+                    <h1 class="page-title">Cluster Overview</h1>
+                    <p class="page-subtitle">Real-time status and performance metrics</p>
+                </div>
+                
+                <div class="grid grid-cols-4 mb-4" id="overview-stats">
+                    <div class="loading"><div class="spinner"></div>Loading stats...</div>
+                </div>
+                
+                <div class="grid grid-cols-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Connected Nodes</h3>
+                        </div>
+                        <div class="card-body" id="overview-nodes">
+                            <div class="loading"><div class="spinner"></div>Loading nodes...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Active Services</h3>
+                        </div>
+                        <div class="card-body" id="overview-services">
+                            <div class="loading"><div class="spinner"></div>Loading services...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">System Health</h3>
+                        </div>
+                        <div class="card-body" id="system-health">
+                            <div class="loading"><div class="spinner"></div>Loading health...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nodes Page -->
+            <div id="nodes-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Node Management</h1>
+                    <p class="page-subtitle">Manage TURN/STUN server nodes with auto IP/Port assignment</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Cluster Nodes</h3>
+                        <button class="btn btn-primary" onclick="app.addNode()">
+                            <span>➕</span>
+                            Add Node (Auto IP/Port)
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="nodes-table">
+                            <div class="loading"><div class="spinner"></div>Loading nodes...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Load Balancer Page -->
+            <div id="load-balancer-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Nginx Load Balancer</h1>
+                    <p class="page-subtitle">Monitor and manage nginx upstream configuration</p>
+                </div>
+                
+                <div id="load-balancer-content">
+                    <div class="loading"><div class="spinner"></div>Loading load balancer data...</div>
+                </div>
+            </div>
+            
+            <!-- Security Page -->
+            <div id="security-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Security Management</h1>
+                    <p class="page-subtitle">SSL certificates, firewall, and security monitoring</p>
+                </div>
+                
+                <div id="security-content">
+                    <div class="loading"><div class="spinner"></div>Loading security data...</div>
+                </div>
+            </div>
+            
+            <!-- Services Page -->
+            <div id="services-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Service Registry</h1>
+                    <p class="page-subtitle">Manage and monitor registered services</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registered Services</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="services-table">
+                            <div class="loading"><div class="spinner"></div>Loading services...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Database Page -->
+            <div id="database-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Database Management</h1>
+                    <p class="page-subtitle">PostgreSQL cluster configuration and monitoring</p>
+                </div>
+                
+                <div class="grid grid-cols-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Connection Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Host:</span>
+                                    <span class="info-value">localhost:5432</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Status:</span>
+                                    <span class="badge badge-success">Connected</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Performance Metrics</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stat-card">
+                                <span class="stat-number">42ms</span>
+                                <span class="stat-label">Avg Query Time</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other pages... -->
+            <div id="redis-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Redis Cache</h1>
+                    <p class="page-subtitle">Cache management and performance monitoring</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <span class="stat-number">94.2%</span>
+                            <span class="stat-label">Cache Hit Rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="logs-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">System Logs</h1>
+                    <p class="page-subtitle">Real-time log monitoring</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="log-viewer" style="height: 400px; overflow-y: auto; background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px;">
+                            <div>Loading logs...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="config-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Configuration</h1>
+                    <p class="page-subtitle">System configuration management</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Configuration management interface will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="monitoring-page" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">Monitoring</h1>
+                    <p class="page-subtitle">Performance monitoring and metrics</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="height: 300px; display: flex; align-items: center; justify-content: center; border: 2px dashed #e2e8f0; border-radius: 8px;">
+                            <div class="text-center">
+                                <div style="font-size: 3rem; margin-bottom: 16px;">📈</div>
+                                <div>Performance charts will be displayed here</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+ <script src="/js/app.js"></script>
+ <script src="/js/ip-generator.js"></script>
+
+</body>
+</html> 

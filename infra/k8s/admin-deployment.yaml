@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-deployment
+  namespace: coturn-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coturn-admin
+  template:
+    metadata:
+      labels:
+        app: coturn-admin
+    spec:
+      containers:
+      - name: admin
+        image: coturn-admin:latest
+        ports:
+        - containerPort: 3000
+        - containerPort: 8080
+        - containerPort: 9001
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PUBSUB_PORT
+          value: "9001"
+        - name: API_PORT
+          value: "8080"
+        - name: DASHBOARD_PORT
+          value: "3000"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-svc
+  namespace: coturn-system
+spec:
+  selector:
+    app: coturn-admin
+  ports:
+  - name: pubsub
+    port: 9001
+    protocol: TCP
+  - name: api
+    port: 8080
+    protocol: TCP
+  - name: dashboard
+    port: 3000
+    protocol: TCP
+  type: ClusterIP

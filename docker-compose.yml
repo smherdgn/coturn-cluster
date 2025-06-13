@@ -1,0 +1,41 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    environment:
+      - NODE_ENV=development
+
+  coturn-node:
+    build:
+      context: .
+      dockerfile: apps/coturn-node/Dockerfile
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./:/app
+    environment:
+      - NODE_ENV=development
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: coturn
+      POSTGRES_PASSWORD: coturn
+      POSTGRES_DB: coturn_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

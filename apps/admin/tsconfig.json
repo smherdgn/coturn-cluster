@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "../../",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@coturn-cluster/shared": [
+        "../../packages/shared/src/index.ts"
+      ]
+    },
+    "lib": [
+      "ES2021",
+      "DOM"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "../../packages/shared/src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "extends": "../../tsconfig.base.json"
+}
