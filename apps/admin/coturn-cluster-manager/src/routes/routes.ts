@@ -1,0 +1,14 @@
+export const AppRoute = {
+  HOME: "/",
+  NODES: "/nodes",
+  SERVICES: "/services",
+  USERS: "/users",
+  LOAD_BALANCER: "/load-balancer",
+  LOGS: "/logs",
+  LOGS_DETAIL: (nodeId: string) => `/logs/${nodeId}`,
+  SECURITY: "/security",
+  DATABASE: "/database",
+  REDIS: "/redis",
+  MONITORING: "/monitoring",
+  CONFIG: "/config",
+} as const;
