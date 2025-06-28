@@ -39,7 +39,7 @@ const SidebarLink: React.FC<{ item: NavItem }> = ({ item }) => {
   return (
     <NavLink
       to={item.path}
-      end={item.path === "/"} // Sadece anasayfa için tam eşleşme
+      end={item.path === "/"}
       className={({ isActive }) =>
         `flex items-center py-2.5 px-5 text-sm transition-colors ${
           isActive ? activeClass : inactiveClass

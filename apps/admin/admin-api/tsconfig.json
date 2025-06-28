@@ -20,7 +20,7 @@
     ]
   },
   "include": [
-    "src/**/*",
+    "admin-api/src/**/*",
     "../../packages/shared/src"
   ],
   "exclude": [

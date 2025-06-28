@@ -1,0 +1,19 @@
+# docker-compose.yml (kök dizinde)
+
+version: '3.8'
+
+services:
+  admin-api:
+    build:
+      context: ./apps/admin-api
+    ports:
+      - "8080:8080"
+    # ... diğer ayarlar (veritabanı bağlantısı, environment vb.)
+
+  admin-ui:
+    build:
+      context: ./apps/admin-ui
+    ports:
+      - "80:80" # Veya çakışma olmasın diye "5173:80" gibi
+
+  # ... diğer servisler (postgres, redis, coturn-node vb.)

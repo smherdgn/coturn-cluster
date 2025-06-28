@@ -3,7 +3,7 @@ import { api } from "../services/api";
 import type { Node, DebugInfo, Service } from "../types";
 import { useNotification } from "../contexts/NotificationContext";
 
-// --- API Fonksiyonları (Veriyi çeken/değiştiren asıl mantık) ---
+// --- API Fonksiyonları ---
 
 const fetchNodes = (): Promise<Node[]> => api("/nodes");
 
@@ -29,7 +29,7 @@ const fetchDebugInfo = (): Promise<DebugInfo> => api("/debug");
 // --- Custom Hooklar ---
 
 /**
- * Tüm node'ları getiren custom hook.
+ * Tüm nodeları getiren custom hook
  */
 export const useNodes = () => {
   return useQuery({
