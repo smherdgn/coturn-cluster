@@ -1,14 +1,37 @@
 services:
-  admin:
+  admin-api:
     build:
       context: .
-      dockerfile: apps/admin/Dockerfile
+      dockerfile: ./apps/admin/admin-api/Dockerfile
     ports:
       - "8080:8080"
     volumes:
-      - ./:/app
+      - ./apps/admin/admin-api:/app/apps/admin/admin-api
+      - ./packages/shared:/app/packages/shared
     environment:
       - NODE_ENV=development
+      - POSTGRES_URL=postgres://coturn:coturn@postgres:5432/coturn_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  admin-ui:
+    build:
+      context: .
+      dockerfile: ./apps/admin/admin-ui/Dockerfile
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   coturn-node:
     build:
@@ -21,28 +44,15 @@ services:
     environment:
       - NODE_ENV=development
 
-  nexrtc-gateway:
-    build:
-      context: .
-      dockerfile: apps/nexrtc-gateway/Dockerfile
-    ports:
-      - "4000:4000"
-    volumes:
-      - ./:/app
-    depends_on:
-      - redis
-      - postgres
-    environment:
-      - NODE_ENV=development
-      - REDIS_URL=redis://redis:6379
-      - POSTGRES_URL=postgres://coturn:coturn@postgres:5432/coturn_db
-      - JWT_SECRET=supersecretjwtkey  # gerekiyorsa
-      - TURN_API_URL=http://coturn-node:8100  # gerekiyorsa
-
   redis:
     image: redis:7
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:15
@@ -54,6 +64,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./apps/admin/admin-api/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coturn -d coturn_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres-data:

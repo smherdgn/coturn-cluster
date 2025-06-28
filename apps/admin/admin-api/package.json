@@ -13,7 +13,7 @@
     "db:seed": "tsx src/database/seed.ts"
   },
   "dependencies": {
-    "@coturn-cluster/shared": "file:../../packages/shared",
+    "@coturn-cluster/shared": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",

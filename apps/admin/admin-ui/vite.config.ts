@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    plugins: [react()], // React eklentisini ekleyin
+    plugins: [react()],
 
     define: {
       "process.env.VITE_GEMINI_API_KEY": JSON.stringify(
