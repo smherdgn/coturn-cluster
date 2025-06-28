@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { AppRoute } from "./routes";
 import Layout from "../components/layout/Layout";
 import OverviewPage from "../pages/OverviewPage";
 import NodesPage from "../pages/NodesPage";
@@ -11,9 +12,9 @@ import DatabasePage from "../pages/DatabasePage";
 import RedisPage from "../pages/RedisPage";
 import MonitoringPage from "../pages/MonitoringPage";
 import ConfigPage from "../pages/ConfigPage";
-import { AppRoute } from "./routes";
+import SettingsPage from "../pages/SettingsPage";
 
-const AppRoutes = () => (
+const AppNavigatorController = () => (
   <Routes>
     <Route path={AppRoute.HOME} element={<Layout />}>
       <Route index element={<OverviewPage />} />
@@ -28,9 +29,10 @@ const AppRoutes = () => (
       <Route path={AppRoute.REDIS} element={<RedisPage />} />
       <Route path={AppRoute.MONITORING} element={<MonitoringPage />} />
       <Route path={AppRoute.CONFIG} element={<ConfigPage />} />
+      <Route path={AppRoute.SETTINGS} element={<SettingsPage />} />
       <Route path="*" element={<h2>404 - Page Not Found</h2>} />
     </Route>
   </Routes>
 );
 
-export default AppRoutes;
+export default AppNavigatorController;

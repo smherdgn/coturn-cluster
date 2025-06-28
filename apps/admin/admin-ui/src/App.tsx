@@ -2,7 +2,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { NotificationProvider } from "./contexts/NotificationContext";
-import AppRoutes from "./routes/AppRoutes";
+import AppNavigatorController from "./routes/AppNavigatorController";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,7 +17,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <NotificationProvider>
       <BrowserRouter>
-        <AppRoutes />
+        <AppNavigatorController />
       </BrowserRouter>
     </NotificationProvider>
     <ReactQueryDevtools initialIsOpen={false} />

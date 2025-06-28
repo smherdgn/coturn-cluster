@@ -11,4 +11,5 @@ export const AppRoute = {
   REDIS: "/redis",
   MONITORING: "/monitoring",
   CONFIG: "/config",
+  SETTINGS: "/settings",
 } as const;

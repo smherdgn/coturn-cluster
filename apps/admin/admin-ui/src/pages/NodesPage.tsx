@@ -5,6 +5,7 @@ import Spinner from "../components/common/Spinner";
 import Card from "../components/common/Card";
 import StatusBadge from "../components/common/StatusBadge";
 import { useNodes, useDeleteNode, useRestartNode } from "../hooks/apiHooks";
+import { AppRoute } from "../routes/routes";
 
 const NodesPage: React.FC = () => {
   const { data: nodes, isLoading, isError, error } = useNodes();
@@ -79,7 +80,7 @@ const NodesPage: React.FC = () => {
                   <tr key={node.nodeId}>
                     <td className="td-cell font-medium">
                       <Link
-                        to={`/logs/${node.nodeId}`}
+                        to={AppRoute.LOGS_DETAIL(node.nodeId)}
                         className="text-blue-600 hover:underline"
                       >
                         {node.nodeId}
@@ -112,7 +113,7 @@ const NodesPage: React.FC = () => {
                           : "Delete"}
                       </button>
                       <Link
-                        to={`/logs/${node.nodeId}`}
+                        to={AppRoute.LOGS_DETAIL(node.nodeId)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         Logs

@@ -5,6 +5,7 @@ import Spinner from "../components/common/Spinner";
 import Card from "../components/common/Card";
 import StatusBadge from "../components/common/StatusBadge";
 import { useNodes, useServices, useDebugInfo } from "../hooks/apiHooks";
+import { AppRoute } from "../routes/routes";
 
 const StatCard: React.FC<{
   title: string;
@@ -51,21 +52,21 @@ const OverviewPage: React.FC = () => {
           value={debugInfo?.totalNodes ?? "N/A"}
           icon="🖥️"
           color="bg-blue-600"
-          to="/nodes"
+          to={AppRoute.NODES}
         />
         <StatCard
           title="Total Clients"
           value={debugInfo?.totalClients ?? "N/A"}
           icon="👥"
           color="bg-indigo-600"
-          to="/users"
+          to={AppRoute.USERS}
         />
         <StatCard
           title="Active Services"
           value={services?.length ?? "N/A"}
           icon="🔧"
           color="bg-sky-600"
-          to="/services"
+          to={AppRoute.SERVICES}
         />
       </div>
 
@@ -80,7 +81,7 @@ const OverviewPage: React.FC = () => {
                 >
                   <div>
                     <Link
-                      to={`/logs/${node.nodeId}`}
+                      to={AppRoute.LOGS_DETAIL(node.nodeId)}
                       className="font-medium text-blue-600 hover:underline"
                     >
                       {node.nodeId}
@@ -97,7 +98,7 @@ const OverviewPage: React.FC = () => {
             )}
             {nodes && nodes.length > 5 && (
               <Link
-                to="/nodes"
+                to={AppRoute.NODES}
                 className="text-center block text-sm text-blue-600 mt-2 hover:underline"
               >
                 View all {nodes.length} nodes...
@@ -129,7 +130,7 @@ const OverviewPage: React.FC = () => {
             )}
             {services && services.length > 5 && (
               <Link
-                to="/services"
+                to={AppRoute.SERVICES}
                 className="text-center block text-sm text-blue-600 mt-2 hover:underline"
               >
                 View all {services.length} services...

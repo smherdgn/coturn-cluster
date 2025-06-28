@@ -1,32 +1,37 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import type { NavGroup, NavItem } from "../../types";
+import { AppRoute } from "../../routes/routes";
 
 const navigationGroups: NavGroup[] = [
-  { title: "Dashboard", items: [{ name: "Overview", path: "/", icon: "📊" }] },
+  {
+    title: "Dashboard",
+    items: [{ name: "Overview", path: AppRoute.HOME, icon: "📊" }],
+  },
   {
     title: "Cluster Management",
     items: [
-      { name: "Nodes", path: "/nodes", icon: "🖥️" },
-      { name: "Services", path: "/services", icon: "🔧" },
-      { name: "Load Balancer", path: "/load-balancer", icon: "⚖️" },
-      { name: "User Management", path: "/users", icon: "👥" },
+      { name: "Nodes", path: AppRoute.NODES, icon: "🖥️" },
+      { name: "Services", path: AppRoute.SERVICES, icon: "🔧" },
+      { name: "Load Balancer", path: AppRoute.LOAD_BALANCER, icon: "⚖️" },
+      { name: "User Management", path: AppRoute.USERS, icon: "👥" },
     ],
   },
   {
     title: "Infrastructure",
     items: [
-      { name: "Database", path: "/database", icon: "🗄️" },
-      { name: "Redis Cache", path: "/redis", icon: "📦" },
-      { name: "Monitoring", path: "/monitoring", icon: "📈" },
+      { name: "Database", path: AppRoute.DATABASE, icon: "🗄️" },
+      { name: "Redis Cache", path: AppRoute.REDIS, icon: "📦" },
+      { name: "Monitoring", path: AppRoute.MONITORING, icon: "📈" },
     ],
   },
   {
     title: "Operations",
     items: [
-      { name: "Logs", path: "/logs", icon: "📜" },
-      { name: "Configuration", path: "/config", icon: "⚙️" },
-      { name: "Security", path: "/security", icon: "🔒" },
+      { name: "Logs", path: AppRoute.LOGS, icon: "📜" },
+      { name: "Configuration", path: AppRoute.CONFIG, icon: "⚙️" },
+      { name: "Settings", path: AppRoute.SETTINGS, icon: "⚙️" },
+      { name: "Security", path: AppRoute.SECURITY, icon: "🔒" },
     ],
   },
 ];

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PageHeader from "../components/layout/PageHeader";
+import { AppRoute } from "../routes/routes";
 
 const SettingCard: React.FC<{
   icon: string;
@@ -35,37 +36,37 @@ const SettingsPage: React.FC = () => {
           icon="🔧"
           title="General Configuration"
           description="Manage cluster-wide settings like log levels and TURN realms."
-          to="/config"
+          to={AppRoute.CONFIG}
         />
         <SettingCard
           icon="👥"
           title="User Management"
           description="Add, remove, and manage TURN/STUN authentication users."
-          to="/users"
+          to={AppRoute.USERS}
         />
         <SettingCard
           icon="🔒"
           title="Security"
           description="View and manage SSL certificates, firewall, and encryption."
-          to="/security"
+          to={AppRoute.SECURITY}
         />
         <SettingCard
           icon="⚖️"
           title="Load Balancer"
           description="Monitor and configure the Nginx load balancer."
-          to="/load-balancer"
+          to={AppRoute.LOAD_BALANCER}
         />
         <SettingCard
           icon="🗄️"
           title="Database"
           description="Check the health and status of the PostgreSQL database."
-          to="/database"
+          to={AppRoute.DATABASE}
         />
         <SettingCard
           icon="📦"
           title="Redis Cache"
           description="Monitor the performance and health of the Redis cache."
-          to="/redis"
+          to={AppRoute.REDIS}
         />
       </div>
     </>
