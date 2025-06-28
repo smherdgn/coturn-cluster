@@ -69,11 +69,13 @@ const LoadBalancerPage: React.FC = () => {
                     <tbody className="bg-white divide-y divide-slate-200">
                       {upstream.servers.map((server) => (
                         <tr key={server.address}>
-                          <td className="td-cell">{server.address}</td>
+                          <td className="td-cell  text-slate-500">
+                            {server.address}
+                          </td>
                           <td className="td-cell">
                             <StatusBadge status={server.status} />
                           </td>
-                          <td className="td-cell">
+                          <td className="td-cell  text-slate-500">
                             {server.requests?.toLocaleString()}
                           </td>
                           <td className="td-cell">

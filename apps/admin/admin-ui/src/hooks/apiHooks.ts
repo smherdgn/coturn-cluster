@@ -12,38 +12,37 @@ import { useNotification } from "../contexts/NotificationContext";
 
 // --- API Fonksiyonları ---
 
-const fetchNodes = (): Promise<Node[]> => api("api/nodes");
+const fetchNodes = (): Promise<Node[]> => api("/nodes");
 
 const addNode = (newNodeData: {
   autoRegisterNginx: boolean;
   ip?: string;
   ports?: object;
 }) =>
-  api<Node>("api/nodes", { method: "POST", body: JSON.stringify(newNodeData) });
+  api<Node>("/nodes", { method: "POST", body: JSON.stringify(newNodeData) });
 
 const deleteNode = (nodeId: string) =>
-  api(`api/nodes/${nodeId}`, { method: "DELETE" });
+  api(`/nodes/${nodeId}`, { method: "DELETE" });
 
 const restartNode = (nodeId: string) =>
-  api(`api/nodes/${nodeId}/restart`, { method: "POST" });
+  api(`/nodes/${nodeId}/restart`, { method: "POST" });
 
 const fetchNodeLogs = (nodeId: string): Promise<string> =>
-  api(`api/nodes/${nodeId}/logs`, { isText: true });
+  api(`/nodes/${nodeId}/logs`, { isText: true });
 
-const fetchServices = (): Promise<Service[]> => api("api/services");
-const fetchDebugInfo = (): Promise<DebugInfo> => api("api/debug");
-const fetchK8sDashboardUrl = () =>
-  api<{ url: string }>("api/k8s-dashboard-url");
+const fetchServices = (): Promise<Service[]> => api("/services");
+const fetchDebugInfo = (): Promise<DebugInfo> => api("/debug");
+const fetchK8sDashboardUrl = () => api<{ url: string }>("/k8s-dashboard-url");
 
-const fetchUsers = (): Promise<User[]> => api("api/users");
+const fetchUsers = (): Promise<User[]> => api("/users");
 const addUser = (userData: Omit<User, "id">) =>
-  api<User>("api/users", { method: "POST", body: JSON.stringify(userData) });
+  api<User>("/users", { method: "POST", body: JSON.stringify(userData) });
 const deleteUser = (userId: string | number) =>
-  api(`api/users/${userId}`, { method: "DELETE" });
+  api(`/users/${userId}`, { method: "DELETE" });
 
-const fetchNginxStatus = (): Promise<NginxStatus> => api("api/nginx/status");
+const fetchNginxStatus = (): Promise<NginxStatus> => api("/nginx/status");
 const fetchSecurityStatus = (): Promise<SecurityStatus> =>
-  api("api/security/status");
+  api("/security/status");
 
 // --- Custom Hooklar ---
 

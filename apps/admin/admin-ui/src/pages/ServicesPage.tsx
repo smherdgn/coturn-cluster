@@ -37,7 +37,9 @@ const ServicesPage: React.FC = () => {
               {services && services.length > 0 ? (
                 services.map((service) => (
                   <tr key={service.serviceId}>
-                    <td className="td-cell font-medium">{service.serviceId}</td>
+                    <td className="td-cell font-medium text-slate-500">
+                      {service.serviceId}
+                    </td>
                     <td className="td-cell text-slate-500">
                       {service.host}:{service.port}
                     </td>
