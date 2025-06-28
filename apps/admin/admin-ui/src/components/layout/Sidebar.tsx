@@ -75,7 +75,7 @@ const Sidebar: React.FC = () => (
       ))}
     </nav>
     <div className="p-5 border-t border-slate-200 text-center">
-      <p className="text-xs text-slate-400">© 2024 Coturn Cluster Manager</p>
+      <p className="text-xs text-slate-400">© 2025 Coturn Cluster Manager</p>
     </div>
   </div>
 );

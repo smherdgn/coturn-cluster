@@ -4,21 +4,17 @@ import PageHeader from "../components/layout/PageHeader";
 import Spinner from "../components/common/Spinner";
 import Card from "../components/common/Card";
 
-// 1. Yeni custom hook'larımızı import edelim
 import { useNodes, useNodeLogs } from "../hooks/apiHooks";
 
 const LogsPage: React.FC = () => {
   const { nodeId } = useParams<{ nodeId: string }>();
   const navigate = useNavigate();
 
-  // 2. Veri çekme işlemlerini yeni hook'larla yapalım
   const { data: nodes, isLoading: isLoadingNodes } = useNodes();
   const { data: logs, isLoading: isLoadingLogs } = useNodeLogs(nodeId);
 
-  // 3. Node seçimi değiştiğinde URL'i güncelleyen fonksiyon
   const handleNodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedNodeId = e.target.value;
-    // URL'i güncelle, bu da useParams'ı ve dolayısıyla useNodeLogs'u tetikleyecek
     navigate(selectedNodeId ? `/logs/${selectedNodeId}` : "/logs");
   };
 
