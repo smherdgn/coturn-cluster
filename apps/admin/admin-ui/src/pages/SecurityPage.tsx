@@ -16,8 +16,7 @@ const SecurityPage: React.FC = () => {
   if (isLoading) return <Spinner />;
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
 
-  const { sslCertificates, firewall, authentication, encryption } =
-    securityStatus || {};
+  const { sslCertificates, firewall } = securityStatus || {};
 
   return (
     <>

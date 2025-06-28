@@ -5,7 +5,7 @@ import Card from "../components/common/Card";
 import { useUsers, useDeleteUser } from "../hooks/apiHooks";
 
 const UsersPage: React.FC = () => {
-  const { data: users, isLoading, isError, error } = useUsers();
+  const { data: users, isLoading } = useUsers();
   const deleteUserMutation = useDeleteUser();
 
   const handleDelete = (userId: string | number, username: string) => {
