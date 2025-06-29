@@ -85,32 +85,39 @@ SSL/TLS Security: End-to-end encryption
 JWT Authentication: Secure API access
 📁 Project Structure
 coturn-cluster/
-├── admin/                      # Admin Dashboard & API Server
-│   ├── src/
-│   │   ├── api/
-│   │   │   ├── server.ts       # Express API server
-│   │   │   └── node-manager.ts # Node management logic
-│   │   ├── pubsub/
-│   │   │   └── broker.ts       # WebSocket pub/sub broker
-│   │   ├── database/
-│   │   │   └── client.ts       # PostgreSQL client
-│   │   ├── config/
-│   │   │   └── environment.ts  # Environment configuration
-│   │   └── server.ts           # Main server entry point
-│   ├── public/                 # Static web assets
-│   │   ├── index.html          # Main dashboard HTML
-│   │   ├── css/
-│   │   │   ├── main.css        # Main stylesheet
-│   │   │   └── dashboard.css   # Dashboard-specific styles
-│   │   └── js/
-│   │       ├── app.js          # Main dashboard JavaScript
-│   │       ├── dashboard.js    # Dashboard components
-│   │       └── ip-generator.js # IP/Port generation utilities
-│   ├── database/
-│   │   └── init.sql           # Database initialization
-│   ├── package.json           # Node.js dependencies
-│   ├── tsconfig.json          # TypeScript configuration
-│   └── Dockerfile             # Container definition
+├── apps/admin                     # Admin Dashboard & API Server
+│   ├── admin-api/                 # Backend Server (Express.js, Node.js)
+│   │   ├── src/
+│   │   │   ├── api/               # API endpoints and routers (exaple: /nodes, /users)
+│   │   │   ├── database/          # Database connection logic, queries
+│   │   │   ├── pubsub/            # WebSocket server logic
+│   │   │   ├── services/          # Business Logic
+│   │   │   └── server.ts          # Main server entry point (Express app launch)
+│   │   │
+│   │   ├── database/              # Additional files related to the database
+│   │   │   └── init.sql           # <-- Database initialization
+│   │   │
+│   │   ├── Dockerfile             # To Dockerize Backend
+│   │   ├── package.json           # Backend dependencies (express, pg, ws, bcryptjs...)
+│   │   └── tsconfig.json          # TypeScript configuration for backend
+│   │
+│   └── admin-ui/                  # Frontend Interface (React, Vite)
+│       ├── public/                # Static files like robots.txt, Favicon
+│       ├── src/
+│       │   ├── components/
+│       │   ├── contexts/
+│       │   ├── hooks/
+│       │   ├── pages/
+│       │   ├── services/
+│       │   ├── types/
+│       │   ├── App.tsx
+│       │   └── main.tsx
+│       │
+│       ├── Dockerfile             # To serve the frontend with Nginx (multi-stage)
+│       ├── nginx.conf             # Nginx configuration file (for SPA)
+│       ├── package.json           # Frontend dependencies (react, react-dom, vite...)
+│       ├── tsconfig.json.         # TypeScript configuration for frontend
+│       └── vite.config.ts         # Gear configuration (with proxy settings)
 │
 ├── coturn-node/               # TURN Server Agents
 │   ├── src/

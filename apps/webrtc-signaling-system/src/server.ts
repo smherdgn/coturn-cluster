@@ -1,19 +1,19 @@
-import Fastify, { FastifyInstance } from 'fastify';
-import { Server as SocketIOServer } from 'socket.io';
-import { createAdapter } from '@socket.io/redis-adapter';
-import helmet from '@fastify/helmet';
-import cors from '@fastify/cors';
-import rateLimit from '@fastify/rate-limit';
+import Fastify, { FastifyInstance } from "fastify";
+import { Server as SocketIOServer } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
+import helmet from "@fastify/helmet";
+import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
 
-import { config } from './shared/config';
-import { logger, Logger } from './shared/utils/logger';
-import { connectRedis, redisClient, checkRedisHealth } from './shared/redis';
-import { checkDatabaseHealth } from './shared/database';
-import { SOCKET_EVENTS, HTTP_STATUS } from './shared/config/constants';
-import type { AuthenticatedSocket, HealthCheckResponse } from './shared/types';
+import { config } from "./shared/config";
+import { logger, Logger } from "./shared/utils/logger";
+import { connectRedis, redisClient, checkRedisHealth } from "./shared/redis";
+import { checkDatabaseHealth } from "./shared/database";
+import { SOCKET_EVENTS, HTTP_STATUS } from "./shared/config/constants";
+import type { AuthenticatedSocket, HealthCheckResponse } from "./shared/types";
 
 // Create logger for server
-const serverLogger = new Logger('Server');
+const serverLogger = new Logger("Server");
 
 // Create Fastify instance
 const fastify: FastifyInstance = Fastify({
@@ -33,18 +33,19 @@ const fastify: FastifyInstance = Fastify({
 
 // Global error handler
 fastify.setErrorHandler(async (error, request, reply) => {
-  serverLogger.error('Unhandled error:', error, {
+  serverLogger.error("Unhandled error:", error, {
     url: request.url,
     method: request.method,
     ip: request.ip,
   });
 
   const statusCode = error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
-  
+
   return reply.status(statusCode).send({
     success: false,
-    error: config.env === 'production' ? 'Internal Server Error' : error.message,
-    code: 'INTERNAL_ERROR',
+    error:
+      config.env === "production" ? "Internal Server Error" : error.message,
+    code: "INTERNAL_ERROR",
     timestamp: new Date(),
   });
 });
@@ -68,66 +69,68 @@ async function registerPlugins(): Promise<void> {
   await fastify.register(cors, {
     origin: config.cors.origin,
     credentials: config.cors.credentials,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   });
 
   // Rate limiting
   await fastify.register(rateLimit, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.windowMs,
-    errorResponseBuilder: (_request, context) => ({
+    errorResponseBuilder: (_request: any, context: { ttl: number }) => ({
       success: false,
-      error: 'Rate limit exceeded',
-      code: 'RATE_LIMIT_EXCEEDED',
+      error: "Rate limit exceeded",
+      code: "RATE_LIMIT_EXCEEDED",
       retryAfter: Math.round(context.ttl / 1000),
       timestamp: new Date(),
     }),
   });
 
-  serverLogger.info('✅ Fastify plugins registered');
+  serverLogger.info("✅ Fastify plugins registered");
 }
 
 // Health check route
-fastify.get('/health', async (_request, reply) => {
+fastify.get("/health", async (_request: any, reply) => {
   const [dbHealth, redisHealth] = await Promise.all([
     checkDatabaseHealth(),
     checkRedisHealth(),
   ]);
 
   const isHealthy = dbHealth && redisHealth;
-  const statusCode = isHealthy ? HTTP_STATUS.OK : HTTP_STATUS.SERVICE_UNAVAILABLE;
+  const statusCode = isHealthy
+    ? HTTP_STATUS.OK
+    : HTTP_STATUS.SERVICE_UNAVAILABLE;
 
   const response: HealthCheckResponse = {
-    status: isHealthy ? 'healthy' : 'unhealthy',
+    status: isHealthy ? "healthy" : "unhealthy",
     uptime: process.uptime(),
     timestamp: new Date(),
     services: {
-      database: dbHealth ? 'healthy' : 'unhealthy',
-      redis: redisHealth ? 'healthy' : 'unhealthy',
+      database: dbHealth ? "healthy" : "unhealthy",
+      redis: redisHealth ? "healthy" : "unhealthy",
     },
-    version: process.env['npm_package_version'] || '1.0.0',
+    version: process.env["npm_package_version"] || "1.0.0",
   };
 
   return reply.status(statusCode).send(response);
 });
 
 // API routes placeholder
-fastify.get('/api/v1/status', async (_request, reply) => {
+fastify.get("/api/v1/status", async (_request: any, reply) => {
   return reply.send({
     success: true,
-    message: 'WebRTC Signaling Server API is running',
-    version: '1.0.0',
+    message: "WebRTC Signaling Server API is running",
+    version: "1.0.0",
     timestamp: new Date(),
   });
 });
 
 // 404 handler
-fastify.setNotFoundHandler(async (_request, reply) => {
+fastify.setNotFoundHandler(async (_request: any, reply) => {
   return reply.status(HTTP_STATUS.NOT_FOUND).send({
     success: false,
-    error: 'Route not found',
-    code: 'NOT_FOUND',
+    error: "Route not found",
+    code: "NOT_FOUND",
     timestamp: new Date(),
   });
 });
@@ -142,7 +145,7 @@ async function setupSocketIO(): Promise<void> {
       origin: config.cors.origin,
       credentials: config.cors.credentials,
     },
-    transports: ['websocket', 'polling'],
+    transports: ["websocket", "polling"],
     pingTimeout: 60000,
     pingInterval: 25000,
     upgradeTimeout: 10000,
@@ -154,31 +157,31 @@ async function setupSocketIO(): Promise<void> {
   try {
     const pubClient = redisClient.duplicate();
     const subClient = redisClient.duplicate();
-    
-    await Promise.all([
-      pubClient.connect(),
-      subClient.connect(),
-    ]);
+
+    await Promise.all([pubClient.connect(), subClient.connect()]);
 
     io.adapter(createAdapter(pubClient, subClient));
-    serverLogger.info('✅ Socket.IO Redis adapter configured');
+    serverLogger.info("✅ Socket.IO Redis adapter configured");
   } catch (error) {
-    serverLogger.warn('Redis adapter setup failed, using memory adapter:', error);
+    serverLogger.warn(
+      "Redis adapter setup failed, using memory adapter:",
+      error
+    );
   }
 
   // Socket.IO middleware for rate limiting
   io.use(async (socket, next) => {
     const clientIP = socket.handshake.address;
     (socket as AuthenticatedSocket).rateLimitIdentifier = `socket:${clientIP}`;
-    
+
     // Add basic properties
     (socket as AuthenticatedSocket).isAuthenticated = false;
-    
+
     serverLogger.debug(`Socket connection attempt from ${clientIP}`, {
       socketId: socket.id,
-      userAgent: socket.handshake.headers['user-agent'],
+      userAgent: socket.handshake.headers["user-agent"],
     });
-    
+
     next();
   });
 
@@ -189,17 +192,21 @@ async function setupSocketIO(): Promise<void> {
 
     // Handle disconnection
     authenticatedSocket.on(SOCKET_EVENTS.DISCONNECT, (reason) => {
-      serverLogger.info(`Socket disconnected: ${authenticatedSocket.id}`, { reason });
-      
+      serverLogger.info(`Socket disconnected: ${authenticatedSocket.id}`, {
+        reason,
+      });
+
       // Cleanup user session if authenticated
       if (authenticatedSocket.isAuthenticated && authenticatedSocket.user) {
         // TODO: Implement session cleanup
-        serverLogger.debug(`Cleaning up session for user: ${authenticatedSocket.user.id}`);
+        serverLogger.debug(
+          `Cleaning up session for user: ${authenticatedSocket.user.id}`
+        );
       }
     });
 
     // Handle connection errors
-    authenticatedSocket.on('error', (error) => {
+    authenticatedSocket.on("error", (error) => {
       serverLogger.error(`Socket error for ${authenticatedSocket.id}:`, error);
     });
 
@@ -207,7 +214,7 @@ async function setupSocketIO(): Promise<void> {
     // TODO: Register auth event handlers
     // Example: registerAuthHandlers(authenticatedSocket);
 
-    // Placeholder for websocket module registration  
+    // Placeholder for websocket module registration
     // TODO: Register websocket event handlers
     // Example: registerWebSocketHandlers(authenticatedSocket);
 
@@ -216,14 +223,14 @@ async function setupSocketIO(): Promise<void> {
     // Example: registerSignalingHandlers(authenticatedSocket);
 
     // Send welcome message
-    authenticatedSocket.emit('server:welcome', {
-      message: 'Connected to WebRTC Signaling Server',
+    authenticatedSocket.emit("server:welcome", {
+      message: "Connected to WebRTC Signaling Server",
       socketId: authenticatedSocket.id,
       timestamp: new Date(),
     });
   });
 
-  serverLogger.info('✅ Socket.IO server configured');
+  serverLogger.info("✅ Socket.IO server configured");
 }
 
 // Graceful shutdown handler
@@ -234,25 +241,25 @@ async function gracefulShutdown(signal: string): Promise<void> {
     // Stop accepting new connections
     if (io) {
       io.close();
-      serverLogger.info('Socket.IO server closed');
+      serverLogger.info("Socket.IO server closed");
     }
 
     // Close Fastify server
     await fastify.close();
-    serverLogger.info('Fastify server closed');
+    serverLogger.info("Fastify server closed");
 
     // Close database connections
-    const { closeDatabaseConnection } = await import('./shared/database');
+    const { closeDatabaseConnection } = await import("./shared/database");
     await closeDatabaseConnection();
 
     // Close Redis connections
-    const { closeRedisConnection } = await import('./shared/redis');
+    const { closeRedisConnection } = await import("./shared/redis");
     await closeRedisConnection();
 
-    serverLogger.info('✅ Graceful shutdown completed');
+    serverLogger.info("✅ Graceful shutdown completed");
     process.exit(0);
   } catch (error) {
-    serverLogger.error('Error during graceful shutdown:', error);
+    serverLogger.error("Error during graceful shutdown:", error);
     process.exit(1);
   }
 }
@@ -260,7 +267,7 @@ async function gracefulShutdown(signal: string): Promise<void> {
 // Startup function
 async function startServer(): Promise<void> {
   try {
-    serverLogger.info('🚀 Starting WebRTC Signaling Server...');
+    serverLogger.info("🚀 Starting WebRTC Signaling Server...");
 
     // Connect to Redis
     await connectRedis();
@@ -280,25 +287,24 @@ async function startServer(): Promise<void> {
     serverLogger.info(`✅ Server running at ${address}`);
     serverLogger.info(`Environment: ${config.env}`);
     serverLogger.info(`Log level: ${config.logging.level}`);
-
   } catch (error) {
-    serverLogger.error('❌ Failed to start server:', error);
+    serverLogger.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }
 
 // Handle process signals
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  serverLogger.error('Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+  serverLogger.error("Uncaught Exception:", error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  serverLogger.error('Unhandled Rejection', reason, { promise });
+process.on("unhandledRejection", (reason, promise) => {
+  serverLogger.error("Unhandled Rejection", reason, { promise });
   process.exit(1);
 });
 

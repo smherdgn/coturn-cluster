@@ -1,0 +1,46 @@
+{
+  "name": "@coturn-cluster/admin",
+  "version": "1.0.0",
+  "description": "Coturn Cluster Admin Dashboard",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "db:migrate": "tsx src/database/migrate.ts",
+    "db:seed": "tsx src/database/seed.ts"
+  },
+  "dependencies": {
+    "@coturn-cluster/shared": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "helmet": "^6.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.8.0",
+    "redis": "^4.5.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.8.0",
+    "ws": "^8.12.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.0",
+    "@types/cors": "^2.8.0",
+    "@types/express": "^4.17.0",
+    "@types/jest": "^29.2.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^18.0.0",
+    "@types/pg": "^8.6.0",
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.57.1",
+    "jest": "^29.6.1",
+    "tsx": "^3.12.0",
+    "typescript": "^5.1.6"
+  }
+}
