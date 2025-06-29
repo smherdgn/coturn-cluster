@@ -7,7 +7,7 @@ import type {
   User,
   NginxStatus,
   SecurityStatus,
-} from "../types";
+} from "@coturn-cluster/shared/src/types";
 import { useNotification } from "../contexts/NotificationContext";
 
 // --- API Fonksiyonları ---
@@ -30,6 +30,12 @@ const restartNode = (nodeId: string) =>
 const fetchNodeLogs = (nodeId: string): Promise<string> =>
   api(`/nodes/${nodeId}/logs`, { isText: true });
 
+const updateNode = (nodeId: string, updateData: Partial<Node>) =>
+  api<Node>(`/nodes/${nodeId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updateData),
+  });
+
 const fetchServices = (): Promise<Service[]> => api("/services");
 const fetchDebugInfo = (): Promise<DebugInfo> => api("/debug");
 const fetchK8sDashboardUrl = () => api<{ url: string }>("/k8s-dashboard-url");
@@ -41,8 +47,19 @@ const deleteUser = (userId: string | number) =>
   api(`/users/${userId}`, { method: "DELETE" });
 
 const fetchNginxStatus = (): Promise<NginxStatus> => api("/nginx/status");
+
 const fetchSecurityStatus = (): Promise<SecurityStatus> =>
   api("/security/status");
+
+const fetchDatabaseStatus = () => api("/database/status");
+const fetchRedisStatus = () => api("/redis/status");
+
+const fetchMonitoringMetrics = () => api("/monitoring/metrics");
+
+const fetchConfig = () => api("/config");
+
+const updateConfig = (config: any) =>
+  api("/config", { method: "POST", body: JSON.stringify(config) });
 
 // --- Custom Hooklar ---
 
@@ -135,6 +152,27 @@ export const useNodeLogs = (nodeId: string | null | undefined) => {
   });
 };
 
+export const useUpdateNode = () => {
+  const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
+  return useMutation({
+    mutationFn: ({
+      nodeId,
+      updateData,
+    }: {
+      nodeId: string;
+      updateData: Partial<Node>;
+    }) => updateNode(nodeId, updateData),
+    onSuccess: () => {
+      addNotification("Node updated successfully.", "success");
+      queryClient.invalidateQueries({ queryKey: ["nodes"] });
+    },
+    onError: (error) => {
+      addNotification(`Failed to update node: ${error.message}`, "error");
+    },
+  });
+};
+
 export const useServices = () => {
   return useQuery({
     queryKey: ["services"],
@@ -159,7 +197,7 @@ export const useNginxStatus = () => {
   return useQuery({
     queryKey: ["nginxStatus"],
     queryFn: fetchNginxStatus,
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 };
 
@@ -180,6 +218,7 @@ export const useK8sDashboardUrl = () => {
   return useQuery({
     queryKey: ["k8sDashboardUrl"],
     queryFn: fetchK8sDashboardUrl,
+    staleTime: Infinity,
   });
 };
 
@@ -219,6 +258,36 @@ export const useDeleteUser = () => {
         `Failed to delete user (ID: ${userId}): ${error.message}`,
         "error"
       );
+    },
+  });
+};
+
+export const useDatabaseStatus = () =>
+  useQuery({ queryKey: ["databaseStatus"], queryFn: fetchDatabaseStatus });
+
+export const useRedisStatus = () =>
+  useQuery({ queryKey: ["redisStatus"], queryFn: fetchRedisStatus });
+
+export const useMonitoringMetrics = () =>
+  useQuery({
+    queryKey: ["monitoringMetrics"],
+    queryFn: fetchMonitoringMetrics,
+  });
+
+export const useConfig = () =>
+  useQuery({ queryKey: ["config"], queryFn: fetchConfig });
+
+export const useUpdateConfig = () => {
+  const queryClient = useQueryClient();
+  const { addNotification } = useNotification();
+  return useMutation({
+    mutationFn: updateConfig,
+    onSuccess: () => {
+      addNotification("Config updated successfully.", "success");
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+    },
+    onError: (error) => {
+      addNotification(`Failed to update config: ${error.message}`, "error");
     },
   });
 };

@@ -86,20 +86,23 @@ JWT Authentication: Secure API access
 📁 Project Structure
 coturn-cluster/
 ├── apps/admin                     # Admin Dashboard & API Server
-│   ├── admin-api/                 # Backend Server (Express.js, Node.js)
+│   ├── admin-api/               # Backend Server (Node.js, Express.js)
 │   │   ├── src/
-│   │   │   ├── api/               # API endpoints and routers (exaple: /nodes, /users)
-│   │   │   ├── database/          # Database connection logic, queries
-│   │   │   ├── pubsub/            # WebSocket server logic
-│   │   │   ├── services/          # Business Logic
-│   │   │   └── server.ts          # Main server entry point (Express app launch)
+│   │   │   ├── api/             # API Layer: Handles HTTP requests and responses
+│   │   │   │   ├── controllers/ # Request handlers, orchestrates services
+│   │   │   │   ├── routes/      # Defines API endpoints and connects them to controllers
+│   │   │   │   ├── services/    # Core Business Logic (e.g., k8s, user, network services)
+│   │   │   │   ├── database/    # Database client, connection pool, and migrations
+│   │   │   │   └── templates/   # Templates for dynamic configurations (e.g., YAML)
+│   │   │   │
+│   │   │   ├── config/          # Environment variables and app configuration
+│   │   │   ├── database/        # Additional files related to the database (init.sql, ...)
+│   │   │   ├── pubsub/          # WebSocket server for real-time communication
+│   │   │   └── server.ts        # Main server entry point (initializes Express app)
 │   │   │
-│   │   ├── database/              # Additional files related to the database
-│   │   │   └── init.sql           # <-- Database initialization
-│   │   │
-│   │   ├── Dockerfile             # To Dockerize Backend
-│   │   ├── package.json           # Backend dependencies (express, pg, ws, bcryptjs...)
-│   │   └── tsconfig.json          # TypeScript configuration for backend
+│   │   ├── Dockerfile           # Dockerizes the backend API for production
+│   │   ├── package.json         # Backend dependencies (express, pg, ws, etc.)
+│   │   └── tsconfig.json        # TypeScript configuration for the backend
 │   │
 │   └── admin-ui/                  # Frontend Interface (React, Vite)
 │       ├── public/                # Static files like robots.txt, Favicon

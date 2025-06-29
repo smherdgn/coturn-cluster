@@ -2,6 +2,8 @@ import React from "react";
 import PageHeader from "../components/layout/PageHeader";
 import Card from "../components/common/Card";
 import StatusBadge from "../components/common/StatusBadge";
+import { useDatabaseStatus } from "../hooks/apiHooks";
+import Spinner from "../components/common/Spinner";
 
 // mock database information
 const dbInfo = {
@@ -25,6 +27,11 @@ const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({
 );
 
 const DatabasePage: React.FC = () => {
+  const { data, isLoading } = useDatabaseStatus();
+
+  if (isLoading) return <Spinner />;
+  // if (isError) return <p className="text-red-500">Error: {error.message}</p>;
+
   return (
     <>
       <PageHeader
@@ -32,12 +39,21 @@ const DatabasePage: React.FC = () => {
         subtitle="PostgreSQL cluster configuration and health monitoring"
       />
 
+      <div>
+        <h1 className="text-2xl text-slate-700 font-bold mb-4">
+          Database Status
+        </h1>
+        <pre className="text-slate-500 p-4 rounded">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card title="Connection Details">
           <InfoRow label="Database Type">{dbInfo.type}</InfoRow>
           <InfoRow label="Host">{dbInfo.host}</InfoRow>
-          <InfoRow label="Port">{dbInfo.port}</InfoRow>
-          <InfoRow label="Version">{dbInfo.version}</InfoRow>
+          <InfoRow label="Port">{data?.provider}</InfoRow>
+          <InfoRow label="Version">{data?.version}</InfoRow>
         </Card>
         <Card title="Health & Performance">
           <InfoRow label="Connection Status">
