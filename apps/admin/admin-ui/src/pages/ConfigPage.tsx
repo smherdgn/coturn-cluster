@@ -1,12 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
+import { useConfig, useUpdateConfig } from "../hooks/apiHooks";
 import PageHeader from "../components/layout/PageHeader";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
+import Spinner from "../components/common/Spinner";
 
 const ConfigPage: React.FC = () => {
+  const { data, isLoading } = useConfig();
+  const updateConfigMutation = useUpdateConfig();
+  const [config, setConfig] = useState<any>(data);
+
+  React.useEffect(() => {
+    setConfig(data);
+  }, [data]);
+
   const handleSave = () => {
-    alert("Configuration saved! (Not really, this is a placeholder)");
+    updateConfigMutation.mutate(config);
   };
+
+  if (isLoading) return <Spinner />;
 
   return (
     <>
@@ -15,6 +27,14 @@ const ConfigPage: React.FC = () => {
         subtitle="Manage system-wide configurations. Changes may require service restarts."
       />
       <Card>
+        <h1 className="text-2xl text-slate-700 font-bold mb-4">
+          System Configuration
+        </h1>
+        <textarea
+          className="w-full h-64 p-2 border rounded"
+          value={JSON.stringify(config, null, 2)}
+          onChange={(e) => setConfig(JSON.parse(e.target.value))}
+        />
         <div className="space-y-6">
           <div>
             <label
@@ -51,7 +71,12 @@ const ConfigPage: React.FC = () => {
           </div>
 
           <div className="pt-2">
-            <Button onClick={handleSave}>Save Configuration</Button>
+            <Button
+              onClick={handleSave}
+              disabled={updateConfigMutation.isPending}
+            >
+              Save Configuration
+            </Button>
           </div>
         </div>
       </Card>

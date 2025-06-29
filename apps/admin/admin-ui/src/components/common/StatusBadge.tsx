@@ -1,5 +1,5 @@
 import React from "react";
-import { type Status } from "../../types";
+import type { Status } from "@coturn-cluster/shared/src/types";
 
 const statusColors: Record<string, string> = {
   healthy: "bg-green-100 text-green-700",

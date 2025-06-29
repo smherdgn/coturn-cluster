@@ -78,3 +78,31 @@ export interface SecurityStatus {
   authentication: { type: string; status: Status };
   encryption: { algorithm: string; status: Status };
 }
+
+// --- Node ---
+export interface NodePorts {
+  turn: number;
+  tls: number;
+  agent: number;
+}
+
+export interface BaseNode {
+  nodeId: string;
+  ip: string;
+  ports: NodePorts;
+}
+
+export interface ConnectedNode extends BaseNode {
+  status: Status;
+  version?: string;
+  agentVersion?: string;
+  capabilities?: string[];
+  lastHeartbeat?: string;
+}
+
+export interface User {
+  id: string | number;
+  username: string;
+  realm: string;
+  createdAt?: string;
+}

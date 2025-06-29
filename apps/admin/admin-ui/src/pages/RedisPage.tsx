@@ -2,6 +2,8 @@ import React from "react";
 import PageHeader from "../components/layout/PageHeader";
 import Card from "../components/common/Card";
 import StatusBadge from "../components/common/StatusBadge";
+import { useRedisStatus } from "../hooks/apiHooks";
+import Spinner from "../components/common/Spinner";
 
 // mock Redis cache information
 const redisInfo = {
@@ -25,12 +27,23 @@ const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({
 );
 
 const RedisPage: React.FC = () => {
+  const { data, isLoading } = useRedisStatus();
+
+  if (isLoading) return <Spinner />;
+
   return (
     <>
       <PageHeader
         title="📦 Redis Cache"
         subtitle="Redis cache management and performance metrics"
       />
+
+      <div>
+        <h1 className="text-2xl text-slate-700 font-bold mb-4">Redis Status</h1>
+        <pre className="text-slate-500 p-4 rounded">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card title="Connection Details">

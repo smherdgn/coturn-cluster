@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import type { NavGroup, NavItem } from "../../types";
+import type { NavGroup, NavItem } from "@coturn-cluster/shared/src/types";
 import { AppRoute } from "../../routes/routes";
 
 const navigationGroups: NavGroup[] = [

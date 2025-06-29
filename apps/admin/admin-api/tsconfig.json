@@ -10,7 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@coturn-cluster/shared": ["../../packages/shared/src/index.ts"]
+      "@coturn-cluster/shared": ["../../packages/shared/src/*"]
     },
     "lib": ["ES2021", "DOM"]
   },
